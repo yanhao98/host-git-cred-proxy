@@ -14,7 +14,7 @@
 | Host 白名单 | 支持 `GIT_CRED_PROXY_ALLOWED_HOSTS` | 不支持 |
 | Unix Socket | 不支持 | 支持（macOS 下不可用） |
 | 生命周期管理 | start/stop/status 脚本 | 手动启停 |
-| 容器配置脚本 | `configure-container.sh` 一键配置 | 手动编辑 gitconfig |
+| 容器配置脚本 | `container/configure-git.sh` 一键配置 | 手动编辑 gitconfig |
 | 后台运行 | `start.sh` 自动后台运行 | 前台运行，需保持终端 |
 | 依赖 | 零依赖 | npm 包，有构建产物 |
 
@@ -38,10 +38,10 @@
 
 ```bash
 # 宿主机
-./start.sh
+./host/start.sh
 
 # 容器
-/workspaces/host-git-cred-proxy/configure-container.sh
+/workspaces/host-git-cred-proxy/container/configure-git.sh
 ```
 
 ### git-credential-forwarder

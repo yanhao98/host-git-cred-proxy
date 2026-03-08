@@ -84,23 +84,29 @@ GIT_CRED_PROXY_PROTOCOLS=https,http ./host/start.sh
 
 ### 3. 容器里配置 Git helper
 
-全局生效：
+如果你当前就在挂载后的 `host-git-cred-proxy` 项目根目录，直接执行：
 
 ```bash
-/workspaces/host-git-cred-proxy/container/configure-git.sh
+./container/configure-git.sh
 ```
 
-只作用于当前仓库：
+如果你想只作用于当前仓库：
 
 ```bash
 cd /path/to/your/repo
-/workspaces/host-git-cred-proxy/container/configure-git.sh --local
+/path/to/host-git-cred-proxy/container/configure-git.sh --local
 ```
 
 或者显式指定仓库：
 
 ```bash
-/workspaces/host-git-cred-proxy/container/configure-git.sh --local --repo /workspaces/your-repo
+/path/to/host-git-cred-proxy/container/configure-git.sh --local --repo /path/to/your-repo
+```
+
+如果这个项目在容器里不是当前目录，而是挂载在固定位置，例如 `/opt/host-git-cred-proxy`，那就执行：
+
+```bash
+/opt/host-git-cred-proxy/container/configure-git.sh
 ```
 
 ### 4. 验证
