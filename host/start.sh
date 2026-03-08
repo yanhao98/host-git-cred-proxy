@@ -82,4 +82,4 @@ printf 'Host listen URL: http://%s:%s\n' "$host" "$port"
 printf 'Container URL: %s\n' "$public_url"
 printf 'Token file: %s\n' "$token_file"
 printf 'Log file: %s\n' "$log_file"
-printf 'Next: run /workspaces/host-git-cred-proxy/container/configure-git.sh inside the container\n'
+printf 'Next: inside the container, run <mounted-host-git-cred-proxy>/container/configure-git.sh\n'
