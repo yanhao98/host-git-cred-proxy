@@ -1,4 +1,4 @@
-# host-git-cred-proxy vs git-credential-forwarder
+# host-git-cred-proxy vs [git-credential-forwarder](https://github.com/sam-mfb/git-credential-forwarder)
 
 两个项目解决同一个问题：让 Docker 容器复用宿主机的 Git HTTPS 凭证。
 
