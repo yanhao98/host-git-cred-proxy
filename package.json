@@ -1,0 +1,16 @@
+{
+  "name": "host-git-cred-proxy",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Reuse host Git HTTPS credentials inside Docker containers on macOS.",
+  "scripts": {
+    "start": "./start.sh",
+    "stop": "./stop.sh",
+    "status": "./status.sh",
+    "check": "bash -n start.sh && bash -n stop.sh && bash -n status.sh && bash -n configure-container.sh && bash -n git-credential-hostproxy && node --check server.mjs && node --check helper.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
