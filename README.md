@@ -16,27 +16,45 @@
 
 这意味着它代理的是“宿主机 Git 当前能取到的 HTTPS 凭证”，不是 macOS 全部系统密码。
 
-## 文件
+## 目录结构
 
-- `start.sh`：在宿主机后台启动代理
-- `stop.sh`：停止代理
-- `status.sh`：查看状态
-- `server.mjs`：宿主机 HTTP 代理服务
-- `git-credential-hostproxy`：容器里给 Git 用的 helper 入口
-- `helper.mjs`：容器 helper 实现
-- `configure-container.sh`：在容器里写入 Git 配置
+- `host/`：只在宿主机运行
+- `container/`：只在容器里运行
+- `examples/`：接入示例
+- `host/state/`：运行时状态目录，存 token、pid、日志
+
+当前结构：
+
+```text
+host-git-cred-proxy/
+├── host/
+│   ├── server.mjs
+│   ├── start.sh
+│   ├── status.sh
+│   ├── stop.sh
+│   └── state/
+├── container/
+│   ├── configure-git.sh
+│   ├── git-credential-hostproxy
+│   └── helper.mjs
+├── examples/
+│   ├── devcontainer.json
+│   └── docker-compose.yml
+├── package.json
+└── README.md
+```
 
 ## 默认行为
 
 - 默认代理所有 `https` Git 凭证
 - 默认监听 `127.0.0.1:18765`
 - 容器默认通过 `http://host.docker.internal:18765` 访问宿主机
-- token 生成到 `./state/token`
+- token 生成到 `./host/state/token`
 
 如果你还要代理 `http` 仓库：
 
 ```bash
-GIT_CRED_PROXY_PROTOCOLS=https,http ./start.sh
+GIT_CRED_PROXY_PROTOCOLS=https,http ./host/start.sh
 ```
 
 ## 使用
@@ -46,18 +64,18 @@ GIT_CRED_PROXY_PROTOCOLS=https,http ./start.sh
 在宿主机进入这个项目目录：
 
 ```bash
-./start.sh
+./host/start.sh
 ```
 
 查看状态：
 
 ```bash
-./status.sh
+./host/status.sh
 ```
 
 ### 2. 确保容器能访问这个项目目录
 
-容器里的 Git helper 会直接引用这个项目目录下的脚本和 `state/token`。
+容器里的 Git helper 会直接引用这个项目目录下的脚本和 `host/state/token`。
 
 所以你需要保证这个目录也能在容器里看到，例如：
 
@@ -69,20 +87,20 @@ GIT_CRED_PROXY_PROTOCOLS=https,http ./start.sh
 全局生效：
 
 ```bash
-/workspaces/host-git-cred-proxy/configure-container.sh
+/workspaces/host-git-cred-proxy/container/configure-git.sh
 ```
 
 只作用于当前仓库：
 
 ```bash
 cd /path/to/your/repo
-/workspaces/host-git-cred-proxy/configure-container.sh --local
+/workspaces/host-git-cred-proxy/container/configure-git.sh --local
 ```
 
 或者显式指定仓库：
 
 ```bash
-/workspaces/host-git-cred-proxy/configure-container.sh --local --repo /workspaces/your-repo
+/workspaces/host-git-cred-proxy/container/configure-git.sh --local --repo /workspaces/your-repo
 ```
 
 ### 4. 验证
@@ -96,6 +114,68 @@ git ls-remote origin
 ```bash
 printf 'protocol=https\nhost=example.com\npath=owner/repo.git\n\n' | git credential fill
 ```
+
+## 接入示例
+
+这两个示例都假设你已经在宿主机启动了代理：
+
+```bash
+./host/start.sh
+```
+
+### docker-compose
+
+示例文件：`examples/docker-compose.yml`
+
+使用前先设置宿主机项目路径：
+
+```bash
+export HOST_GIT_CRED_PROXY_DIR=/workspaces/host-git-cred-proxy
+```
+
+然后把示例复制到你的项目里：
+
+```bash
+cp /workspaces/host-git-cred-proxy/examples/docker-compose.yml ./docker-compose.yml
+docker compose up -d
+```
+
+这个示例会：
+
+- 把当前项目挂到容器内的 `/workspace`
+- 把 `host-git-cred-proxy` 挂到容器内的 `/opt/host-git-cred-proxy`
+- 容器启动时自动执行 `/opt/host-git-cred-proxy/container/configure-git.sh --global`
+
+如果你在 OrbStack 里用 `network_mode: host`，也可以把 `GIT_CRED_PROXY_URL` 改成：
+
+```bash
+http://localhost:18765
+```
+
+### devcontainer
+
+示例文件：`examples/devcontainer.json`
+
+先在宿主机设置：
+
+```bash
+export HOST_GIT_CRED_PROXY_DIR=/workspaces/host-git-cred-proxy
+```
+
+然后复制到你的项目：
+
+```bash
+mkdir -p .devcontainer
+cp /workspaces/host-git-cred-proxy/examples/devcontainer.json .devcontainer/devcontainer.json
+```
+
+这个示例会：
+
+- 把当前工作区挂到容器内的 `/workspace`
+- 额外挂载 `host-git-cred-proxy` 到 `/opt/host-git-cred-proxy`
+- 在容器创建完成后自动执行 `/opt/host-git-cred-proxy/container/configure-git.sh --global`
+
+如果你的本地路径不是 `/workspaces/host-git-cred-proxy`，只要把 `HOST_GIT_CRED_PROXY_DIR` 换成真实绝对路径即可。
 
 ## 可选环境变量
 
@@ -112,12 +192,12 @@ printf 'protocol=https\nhost=example.com\npath=owner/repo.git\n\n' | git credent
 ## 安全说明
 
 - 服务端默认只监听 `127.0.0.1`
-- token 存在项目目录下，并通过 `.gitignore` 忽略
+- token 存在 `host/state/` 下，并通过 `.gitignore` 忽略
 - 只要容器能读取这个目录，也就能读取 token
 - 这适合你信任当前容器的开发场景，不适合不可信容器或多租户环境
 
 ## 停止代理
 
 ```bash
-./stop.sh
+./host/stop.sh
 ```

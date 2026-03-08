@@ -1,3 +1,4 @@
+host/state/
 state/
 .DS_Store
 node_modules/
