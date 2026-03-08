@@ -1,0 +1,16 @@
+services:
+  dev:
+    image: mcr.microsoft.com/devcontainers/base:ubuntu
+    working_dir: /workspace
+    command: >
+      bash -lc "
+        /opt/host-git-cred-proxy/container/configure-git.sh --global &&
+        sleep infinity
+      "
+    tty: true
+    stdin_open: true
+    environment:
+      GIT_CRED_PROXY_URL: ${GIT_CRED_PROXY_URL:-http://host.docker.internal:18765}
+    volumes:
+      - .:/workspace
+      - ${HOST_GIT_CRED_PROXY_DIR}:/opt/host-git-cred-proxy:ro
