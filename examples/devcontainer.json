@@ -4,7 +4,13 @@
   "workspaceFolder": "/workspace",
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
   "mounts": [
-    "source=${localEnv:HOST_GIT_CRED_PROXY_DIR},target=/opt/host-git-cred-proxy,type=bind,readonly"
+    "source=${localEnv:HOST_GIT_CRED_PROXY_TOKEN_DIR},target=/run/host-git-cred-proxy,type=bind,readonly"
   ],
-  "postCreateCommand": "/opt/host-git-cred-proxy/container/configure-git.sh --global"
+  "containerEnv": {
+    "INSTALL_DIR": "/usr/local/bin",
+    "GIT_CRED_PROXY_INSTALL_URL": "http://host.docker.internal:18765",
+    "GIT_CRED_PROXY_URL": "http://host.docker.internal:18765",
+    "GIT_CRED_PROXY_TOKEN_FILE": "/run/host-git-cred-proxy/token"
+  },
+  "postCreateCommand": "sh -lc 'curl -fsSL \"$GIT_CRED_PROXY_INSTALL_URL/container/install.sh\" | sh && \"$INSTALL_DIR/configure-git.sh\" --global'"
 }
