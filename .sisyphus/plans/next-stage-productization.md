@@ -794,7 +794,7 @@ Wave 4: container onboarding, packaging, release automation, Homebrew automation
 
   **Commit**: YES | Message: `feat(container): make configure-git safe and idempotent` | Files: `container/configure-git.sh`, `tests/container/`
 
-- [ ] 17. Add `container/install.sh` and refresh all onboarding examples to the path-free token-directory model
+- [x] 17. Add `container/install.sh` and refresh all onboarding examples to the path-free token-directory model
 
   **What to do**: Implement `container/install.sh` so a container can run `curl -fsSL <publicUrl>/container/install.sh | sh`. The script must default `INSTALL_DIR=/usr/local/bin`, verify `sh`, `curl`, and directory write permission, download `git-credential-hostproxy` and `configure-git.sh`, mark them executable, and print the next-step commands. If `/usr/local/bin` is not writable, exit with a clear message that names `INSTALL_DIR` as the supported override. Refresh `examples/docker-compose.yml`, `examples/devcontainer.json`, and README snippets to use install-from-host plus directory-mounted token path (`/run/host-git-cred-proxy/token`).
   **Must NOT do**: Do not require repo mounts; do not fetch from GitHub Releases inside the container installer; do not assume write access to `/usr/local/bin` without checking it.

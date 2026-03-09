@@ -87,3 +87,9 @@
 ## Quoting and Command Construction in POSIX sh
 - Avoid building multi-word commands in variables (e.g. `cmd="git -C  config"`) if any word might contain spaces.
 - Using shell functions with `"$@"` is the robust POSIX sh way to wrap commands with dynamic arguments or options while maintaining quoting integrity.
+
+## Task 17 Container Installer + Onboarding Refresh
+- `/container/install.sh` is now backed by the real `container/install.sh` asset and templated at response time with the current `publicUrl`.
+- Installer behavior is now explicit for permission failures: default `/usr/local/bin` writes must succeed, otherwise the error message names `INSTALL_DIR` as the supported fix.
+- Updated onboarding examples remove `host-git-cred-proxy` source-tree mounts and instead use install-from-host plus token-directory mounts (`/run/host-git-cred-proxy/token`).
+- Added `smoke:container-install` coverage that fetches installer over HTTP and verifies executable installs into a temp `INSTALL_DIR`.
