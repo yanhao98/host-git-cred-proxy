@@ -1,3 +1,4 @@
+### Helper Script Content ###
 #!/bin/sh
 set -eu
 
@@ -70,3 +71,9 @@ else
     fi
     exit 1
 fi
+
+### Test Results ###
+bun test v1.3.10 (30e609e0)
+
+### Shell Check ###
+OK
