@@ -36,7 +36,8 @@ host-git-cred-proxy/
 ├── container/
 │   ├── configure-git.sh
 │   ├── git-credential-hostproxy
-│   └── helper.mjs
+│   ├── helper.mjs
+│   └── install.sh
 ├── examples/
 │   ├── devcontainer.json
 │   └── docker-compose.yml
@@ -73,40 +74,48 @@ GIT_CRED_PROXY_PROTOCOLS=https,http ./host/start.sh
 ./host/status.sh
 ```
 
-### 2. 确保容器能访问这个项目目录
+### 2. 把宿主机 token 目录挂载到容器
 
-容器里的 Git helper 会直接引用这个项目目录下的脚本和 `host/state/token`。
+容器只需要读取 token 目录，不需要挂载 `host-git-cred-proxy` 源码仓库。
 
-所以你需要保证这个目录也能在容器里看到，例如：
+推荐把宿主机 state 目录挂载到容器内固定路径 `/run/host-git-cred-proxy`，
+这样 helper 默认就会读取 `/run/host-git-cred-proxy/token`。
 
-- 宿主机和容器都共享 `/workspaces`
-- 或者把这个目录单独挂载到容器内
+请挂载目录（而不是单个 token 文件），这样 token 轮换后容器里仍能读到新文件。
 
-### 3. 容器里配置 Git helper
-
-如果你当前就在挂载后的 `host-git-cred-proxy` 项目根目录，直接执行：
+### 3. 容器里安装并配置 Git helper
 
 ```bash
-./container/configure-git.sh
+curl -fsSL http://host.docker.internal:18765/container/install.sh | sh
+configure-git.sh --global
 ```
 
 如果你想只作用于当前仓库：
 
 ```bash
-cd /path/to/your/repo
-/path/to/host-git-cred-proxy/container/configure-git.sh --local
+configure-git.sh --local
 ```
 
 或者显式指定仓库：
 
 ```bash
-/path/to/host-git-cred-proxy/container/configure-git.sh --local --repo /path/to/your-repo
+configure-git.sh --local --repo /path/to/your-repo
 ```
 
-如果这个项目在容器里不是当前目录，而是挂载在固定位置，例如 `/opt/host-git-cred-proxy`，那就执行：
+如果 `/usr/local/bin` 不可写，请使用 `INSTALL_DIR` 覆盖安装目录：
 
 ```bash
-/opt/host-git-cred-proxy/container/configure-git.sh
+INSTALL_DIR="$HOME/.local/bin" curl -fsSL http://host.docker.internal:18765/container/install.sh | sh
+"$HOME/.local/bin/configure-git.sh" --global
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+如果你把宿主机服务的 `publicUrl` 改成了其他地址（例如 OrbStack `network_mode: host` 下使用 `http://localhost:18765`），请同时覆盖安装地址和运行地址：
+
+```bash
+export GIT_CRED_PROXY_INSTALL_URL=http://localhost:18765
+export GIT_CRED_PROXY_URL=http://localhost:18765
+curl -fsSL "$GIT_CRED_PROXY_INSTALL_URL/container/install.sh" | sh
 ```
 
 ### 4. 验证
@@ -133,26 +142,28 @@ printf 'protocol=https\nhost=example.com\npath=owner/repo.git\n\n' | git credent
 
 示例文件：`examples/docker-compose.yml`
 
-使用前先设置宿主机项目路径：
+使用前先设置 token 目录和容器访问地址：
 
 ```bash
-export HOST_GIT_CRED_PROXY_DIR=/workspaces/host-git-cred-proxy
+export HOST_GIT_CRED_PROXY_TOKEN_DIR=/absolute/path/to/host-git-cred-proxy/host/state
+export GIT_CRED_PROXY_INSTALL_URL=http://host.docker.internal:18765
+export GIT_CRED_PROXY_URL=http://host.docker.internal:18765
 ```
 
 然后把示例复制到你的项目里：
 
 ```bash
-cp /workspaces/host-git-cred-proxy/examples/docker-compose.yml ./docker-compose.yml
+cp examples/docker-compose.yml /path/to/your-project/docker-compose.yml
 docker compose up -d
 ```
 
 这个示例会：
 
 - 把当前项目挂到容器内的 `/workspace`
-- 把 `host-git-cred-proxy` 挂到容器内的 `/opt/host-git-cred-proxy`
-- 容器启动时自动执行 `/opt/host-git-cred-proxy/container/configure-git.sh --global`
+- 把 token 目录挂到容器内的 `/run/host-git-cred-proxy`（只读）
+- 容器启动时先执行 `curl .../container/install.sh | sh`，再执行 `configure-git.sh --global`
 
-如果你在 OrbStack 里用 `network_mode: host`，也可以把 `GIT_CRED_PROXY_URL` 改成：
+如果你在 OrbStack 里用 `network_mode: host`，把 `GIT_CRED_PROXY_INSTALL_URL` 和 `GIT_CRED_PROXY_URL` 都改成：
 
 ```bash
 http://localhost:18765
@@ -165,23 +176,23 @@ http://localhost:18765
 先在宿主机设置：
 
 ```bash
-export HOST_GIT_CRED_PROXY_DIR=/workspaces/host-git-cred-proxy
+export HOST_GIT_CRED_PROXY_TOKEN_DIR=/absolute/path/to/host-git-cred-proxy/host/state
 ```
 
 然后复制到你的项目：
 
 ```bash
 mkdir -p .devcontainer
-cp /workspaces/host-git-cred-proxy/examples/devcontainer.json .devcontainer/devcontainer.json
+cp examples/devcontainer.json .devcontainer/devcontainer.json
 ```
 
 这个示例会：
 
 - 把当前工作区挂到容器内的 `/workspace`
-- 额外挂载 `host-git-cred-proxy` 到 `/opt/host-git-cred-proxy`
-- 在容器创建完成后自动执行 `/opt/host-git-cred-proxy/container/configure-git.sh --global`
+- 挂载 token 目录到 `/run/host-git-cred-proxy`
+- 在容器创建完成后自动执行 `curl .../container/install.sh | sh` + `configure-git.sh --global`
 
-如果你的本地路径不是 `/workspaces/host-git-cred-proxy`，只要把 `HOST_GIT_CRED_PROXY_DIR` 换成真实绝对路径即可。
+如果你的服务 `publicUrl` 不是默认值，请在 `devcontainer.json` 里同步更新 `GIT_CRED_PROXY_INSTALL_URL` 和 `GIT_CRED_PROXY_URL`。
 
 ## 可选环境变量
 
@@ -191,9 +202,11 @@ cp /workspaces/host-git-cred-proxy/examples/devcontainer.json .devcontainer/devc
 - `GIT_CRED_PROXY_PROTOCOLS`：允许代理的协议列表，默认 `https`
 - `GIT_CRED_PROXY_ALLOWED_HOSTS`：可选，限制允许代理的 host，逗号分隔
 - `GIT_CRED_PROXY_URL`：容器 helper 访问代理的地址，默认 `http://host.docker.internal:18765`
+- `GIT_CRED_PROXY_INSTALL_URL`：容器下载 `install.sh` 的地址，建议与 `GIT_CRED_PROXY_URL` 保持一致
 - `GIT_CRED_PROXY_TOKEN`：可选，直接传 token，优先于 token 文件
 - `GIT_CRED_PROXY_TOKEN_FILE`：可选，自定义 token 文件路径
 - `GIT_CRED_PROXY_RUNTIME`：可选，显式指定 `bun` 或 `node`
+- `HOST_GIT_CRED_PROXY_TOKEN_DIR`：示例编排文件使用的宿主机 token 目录（挂载到 `/run/host-git-cred-proxy`）
 
 ## 安全说明
 
