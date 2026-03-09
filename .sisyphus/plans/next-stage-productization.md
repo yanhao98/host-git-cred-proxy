@@ -499,7 +499,7 @@ Wave 4: container onboarding, packaging, release automation, Homebrew automation
 
   **Commit**: YES | Message: `feat(admin): add loopback origin and nonce guards` | Files: `host/src/routes/`, `host/src/utils/`, `tests/host/`
 
-- [ ] 10. Implement the full admin API contract, including restart and bootstrap recovery semantics
+- [x] 10. Implement the full admin API contract, including restart and bootstrap recovery semantics
 
   **What to do**: Implement `GET /api/admin/bootstrap`, `GET /api/admin/status`, `GET /api/admin/config`, `POST /api/admin/config`, `POST /api/admin/restart`, `POST /api/admin/token/rotate`, `GET /api/admin/requests`, and `GET /api/admin/logs`. Use these exact response contracts:
   - `GET /api/admin/bootstrap` → `{ adminNonce, version, config, runtime, derived: { panelUrl, listenUrl, publicUrl, stateDir, tokenFilePath, installCommand } }`

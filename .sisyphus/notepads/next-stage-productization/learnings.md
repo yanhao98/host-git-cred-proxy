@@ -58,3 +58,20 @@
 - POSIX sh compatibility: avoid bashisms like [[ ]], local, and arrays.
 - Used mktemp for response body to handle large outputs and separate http_code from body.
 - Testing: spawnSync blocks Bun event loop, preventing Bun.serve from responding. Use asynchronous spawn (Bun.spawn or child_process.spawn) in tests.
+
+## Task 10 Admin API Contract
+- Admin API route plugin is easiest to keep contract-stable when each endpoint is explicit (`.get/.post`) and all share the same `beforeHandle` hook wiring from `createAdminGuard`.
+- In Elysia handlers, prefer `context.body` for JSON POST payloads; calling `request.json()` can fail after framework parsing consumes the request stream.
+- `runtime.json` parsing should be strict and nullable: treat missing/empty/invalid payloads as `null` for bootstrap, and only fall back to `{ pid: process.pid, startedAt: now }` in status where required.
+- Bounded log API behavior is deterministic by line-tail slicing: split log into lines, drop trailing empty newline, return the newest 200 and a `truncated` flag when more exist.
+- Existing characterization tests that assumed admin 404 must be updated once real admin routes land to keep full-suite regression signals meaningful.
+
+## Task 10 Admin API Tests (follow-up)
+- Admin-guarded endpoint tests are most reliable with a real `app.listen({ port: 0 })` server + `fetch`; `app.handle(new Request(...))` does not consistently provide request IP context for loopback checks.
+- For POST admin endpoints, test helpers should always attach both `Origin: new URL(config.publicUrl).origin` and `X-Admin-Nonce: adminNonceService.getNonce()` or guard rejections will mask route-contract assertions.
+- Updating reserved-prefix regression tests from `404` to explicit JSON payload assertions (`running`, `pid`, `startedAt`) avoids false positives from content-type-only checks.
+
+## Task 10 Admin Origin Trust Fix (live QA regression)
+- Admin POST Origin trust must be derived from the local panel/listen origin (`http://<listen-host>:<listen-port>`), never from `config.publicUrl` (container-facing metadata).
+- Regression coverage should assert both directions in one test: local loopback origin + valid nonce succeeds, while `publicUrl` origin + same nonce is rejected with trusted-Origin `403`.
+- `startServer()` should propagate runtime host/port overrides into the config passed to route wiring so admin guard origin checks stay aligned with the actual bound listener.
