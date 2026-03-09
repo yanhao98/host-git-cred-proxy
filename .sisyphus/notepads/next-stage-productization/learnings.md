@@ -75,3 +75,15 @@
 - Admin POST Origin trust must be derived from the local panel/listen origin (`http://<listen-host>:<listen-port>`), never from `config.publicUrl` (container-facing metadata).
 - Regression coverage should assert both directions in one test: local loopback origin + valid nonce succeeds, while `publicUrl` origin + same nonce is rejected with trusted-Origin `403`.
 - `startServer()` should propagate runtime host/port overrides into the config passed to route wiring so admin guard origin checks stay aligned with the actual bound listener.
+
+## Task 16 Rewriting configure-git.sh
+- Switched to "installed-command mode": configure `credential.helper` to just `git-credential-hostproxy`.
+- Implemented safe helper-chain mutation in pure POSIX sh using `mktemp` and temporary files to handle list manipulation.
+- Instead of wiping helpers, we now ensure `git-credential-hostproxy` is the FIRST helper while preserving others in their original order.
+- Migration logic now automatically removes old-style path-based hostproxy entries (e.g. `/path/to/git-credential-hostproxy`).
+- `git config --get-all` and `--unset-all` must handle exit status 1 with `|| true` when the key is missing to avoid script failure under `set -e`.
+- Testing git configuration requires isolating `$HOME` to prevent accidental modification of real global config.
+
+## Quoting and Command Construction in POSIX sh
+- Avoid building multi-word commands in variables (e.g. `cmd="git -C  config"`) if any word might contain spaces.
+- Using shell functions with `"$@"` is the robust POSIX sh way to wrap commands with dynamic arguments or options while maintaining quoting integrity.

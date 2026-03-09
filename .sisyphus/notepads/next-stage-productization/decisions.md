@@ -11,3 +11,9 @@
 
 ## Task 9 Admin Guard Shape
 - Keep admin route protection as standalone request evaluation plus an Elysia-compatible `beforeHandle` wrapper, with optional custom IP resolution for tests and Bun `server.requestIP(request)` fallback at runtime.
+
+## Task 16: Helper-chain Mutation Policy
+- `configure-git.sh` must prepend `git-credential-hostproxy` to the helper list.
+- All existing non-duplicate helpers must be re-added in their original relative order.
+- Old path-based entries for `git-credential-hostproxy` must be purged during the transition to command-based mode.
+- `credential.useHttpPath` must be set to `true` in the same scope as the helper configuration.

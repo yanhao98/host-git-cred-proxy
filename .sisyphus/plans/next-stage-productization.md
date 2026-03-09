@@ -753,7 +753,7 @@ Wave 4: container onboarding, packaging, release automation, Homebrew automation
 
   **Commit**: YES | Message: `feat(container): rewrite shell credential helper` | Files: `container/git-credential-hostproxy`, `tests/container/`
 
-- [ ] 16. Rewrite `container/configure-git.sh` with safe helper-chain mutation and idempotency
+- [x] 16. Rewrite `container/configure-git.sh` with safe helper-chain mutation and idempotency
 
   **What to do**: Keep `container/configure-git.sh` as a standalone script, but change it from repo-path binding to installed-command mode. Support `--global`, `--local`, and `--repo PATH`. New mutation policy is fixed: read all existing `credential.helper` values, remove only duplicate `git-credential-hostproxy` entries, then rewrite the helper list so `git-credential-hostproxy` is first and all pre-existing non-duplicate helpers are re-added in original order. Always set `credential.useHttpPath true` in the chosen scope. Print the resulting helper chain so the user can see what changed.
   **Must NOT do**: Do not blank out `credential.helper` permanently; do not drop existing non-hostproxy helpers; do not depend on repo-relative helper paths.
