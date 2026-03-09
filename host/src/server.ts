@@ -1,6 +1,7 @@
 import { Elysia } from 'elysia';
 
 import { createAdminGuard } from './middleware/admin-guard';
+import { createAdminRoutes } from './routes/admin';
 import { createContainerRoutes } from './routes/container';
 import { createProxyRoutes } from './routes/proxy';
 import { AdminNonceService } from './services/admin-nonce';
@@ -8,7 +9,6 @@ import { loadConfig, type Config } from './services/config';
 import { resolveStateDir } from './services/state-dir';
 import { TokenService } from './services/token';
 
-const CONTENT_TYPE_TEXT = 'text/plain; charset=utf-8';
 const DEFAULT_HOST = '127.0.0.1';
 const DEFAULT_PORT = 18765;
 
@@ -33,13 +33,13 @@ export type StartServerOptions = CreateServerOptions & {
 
 export const createServer = (options: CreateServerOptions = {}) => {
   const services = initializeServerServices(options);
-  const panelOrigin = new URL(services.config.publicUrl).origin;
+  const panelOrigin = resolvePanelOrigin(services.config);
   const adminGuard = createAdminGuard({
     nonceService: services.adminNonceService,
     panelOrigin,
   });
 
-  return new Elysia()
+  const app = new Elysia()
     .use(
       createProxyRoutes({
         tokenService: services.tokenService,
@@ -52,20 +52,22 @@ export const createServer = (options: CreateServerOptions = {}) => {
         config: services.config,
       }),
     )
-    .all(
-      '/api/admin/*',
-      () => {
-        return new Response('Not Found\n', {
-          status: 404,
-          headers: {
-            'content-type': CONTENT_TYPE_TEXT,
-          },
-        });
-      },
-      {
-        beforeHandle: adminGuard.beforeHandle,
-      },
+    .use(
+      createAdminRoutes(
+        {
+          stateDir: services.stateDir,
+          config: services.config,
+          tokenService: services.tokenService,
+          adminNonceService: services.adminNonceService,
+          getServerInstance: () => app,
+        },
+        {
+          beforeHandle: adminGuard.beforeHandle,
+        },
+      ),
     );
+
+  return app;
 };
 
 export const startServer = (options: number | StartServerOptions = {}) => {
@@ -74,10 +76,15 @@ export const startServer = (options: number | StartServerOptions = {}) => {
 
   const host = normalizedOptions.host ?? services.config.host ?? DEFAULT_HOST;
   const port = normalizedOptions.port ?? services.config.port ?? DEFAULT_PORT;
+  const runtimeConfig: Config = {
+    ...services.config,
+    host,
+    port,
+  };
 
   return createServer({
     stateDir: services.stateDir,
-    config: services.config,
+    config: runtimeConfig,
     tokenService: services.tokenService,
     adminNonceService: services.adminNonceService,
   }).listen({
@@ -96,6 +103,10 @@ function initializeServerServices(options: CreateServerOptions): ServerServices 
     tokenService: options.tokenService ?? new TokenService(stateDir),
     adminNonceService: options.adminNonceService ?? new AdminNonceService(),
   };
+}
+
+function resolvePanelOrigin(config: Config): string {
+  return `http://${config.host}:${config.port}`;
 }
 
 if (import.meta.main) {

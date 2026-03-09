@@ -262,15 +262,18 @@ describe('proxy + container routes', () => {
     });
   });
 
-  test('/api/admin/status without admin API implementation -> 404 and never HTML fallback', async () => {
+  test('/api/admin/status returns JSON from loopback', async () => {
     await withHostServer({}, async ({ baseUrl }) => {
       const response = await fetch(`${baseUrl}/api/admin/status`);
       const contentType = (response.headers.get('content-type') ?? '').toLowerCase();
-      const text = (await response.text()).toLowerCase();
 
-      expect(response.status).toBe(404);
-      expect(contentType.includes('text/html')).toBe(false);
-      expect(text.includes('<!doctype html') || text.includes('<html')).toBe(false);
+      expect(response.status).toBe(200);
+      expect(contentType.includes('application/json')).toBe(true);
+
+      const payload = await response.json();
+      expect(payload.running).toBe(true);
+      expect(typeof payload.pid).toBe('number');
+      expect(typeof payload.startedAt).toBe('string');
     });
   });
 

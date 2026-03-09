@@ -1,0 +1,38 @@
+Task 10 Evidence — Admin Origin trust bugfix
+Date: 2026-03-10
+
+Files updated for fix:
+- host/src/server.ts
+  - Admin guard `panelOrigin` now derives from local listen config (`http://${config.host}:${config.port}`), not `config.publicUrl`.
+  - `startServer()` now passes runtime host/port into the server config used by route wiring.
+- tests/host/admin-api.test.ts
+  - Test harness now uses local panel origin (`http://127.0.0.1:<port>`) for admin POST helper headers.
+  - Added regression test: local panel Origin + valid nonce succeeds, `publicUrl` Origin + valid nonce is rejected.
+
+Verification output:
+
+$ bun test tests/host/admin-api.test.ts tests/host/admin-security.test.ts
+bun test v1.3.10 (30e609e0)
+
+ 22 pass
+ 0 fail
+ 86 expect() calls
+Ran 22 tests across 2 files. [184.00ms]
+
+$ bun test
+bun test v1.3.10 (30e609e0)
+
+ 102 pass
+ 10 skip
+ 0 fail
+ 340 expect() calls
+Ran 112 tests across 10 files. [3.83s]
+
+$ bun run check
+$ bun run check:types && bun run check:shell
+$ tsc --project tsconfig.host.json --noEmit && tsc --project host/ui/tsconfig.json --noEmit
+$ bash -n host/start.sh host/stop.sh host/status.sh container/configure-git.sh container/git-credential-hostproxy
+
+LSP diagnostics:
+- host/src/server.ts: clean
+- tests/host/admin-api.test.ts: clean
