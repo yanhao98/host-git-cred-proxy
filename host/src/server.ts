@@ -4,6 +4,7 @@ import { createAdminGuard } from './middleware/admin-guard';
 import { createAdminRoutes } from './routes/admin';
 import { createContainerRoutes } from './routes/container';
 import { createProxyRoutes } from './routes/proxy';
+import { createUiRoutes } from './routes/ui';
 import { AdminNonceService } from './services/admin-nonce';
 import { loadConfig, type Config } from './services/config';
 import { resolveStateDir } from './services/state-dir';
@@ -65,7 +66,8 @@ export const createServer = (options: CreateServerOptions = {}) => {
           beforeHandle: adminGuard.beforeHandle,
         },
       ),
-    );
+    )
+    .use(createUiRoutes());
 
   return app;
 };
