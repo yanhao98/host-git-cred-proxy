@@ -1,10 +1,9 @@
 #!/bin/sh
 set -eu
 
-script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-helper_path="$script_dir/git-credential-hostproxy"
 scope='global'
 target_repo=$(pwd)
+helper_cmd='git-credential-hostproxy'
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -30,17 +29,52 @@ while [ "$#" -gt 0 ]; do
   shift
 done
 
-if [ "$scope" = 'global' ]; then
-  git config --global --replace-all credential.helper ''
-  git config --global --add credential.helper "$helper_path"
-  git config --global credential.useHttpPath true
-  printf 'Configured global Git credential helper: %s\n' "$helper_path"
-else
-  git -C "$target_repo" config --local --replace-all credential.helper ''
-  git -C "$target_repo" config --local --add credential.helper "$helper_path"
-  git -C "$target_repo" config --local credential.useHttpPath true
-  printf 'Configured local Git credential helper for %s\n' "$target_repo"
-fi
+git_config() {
+  if [ "$scope" = 'global' ]; then
+    git config --global "$@"
+  else
+    git -C "$target_repo" config --local "$@"
+  fi
+}
 
-printf 'Proxy URL default: %s\n' "${GIT_CRED_PROXY_URL:-http://host.docker.internal:18765}"
+tmp_helpers=$(mktemp)
+git_config --get-all credential.helper > "$tmp_helpers" 2>/dev/null || true
+
+new_helpers_tmp=$(mktemp)
+printf '%s\n' "$helper_cmd" > "$new_helpers_tmp"
+
+while IFS= read -r existing_helper; do
+  if [ -z "$existing_helper" ]; then
+    continue
+  fi
+  if [ "$existing_helper" != "$helper_cmd" ]; then
+    case "$existing_helper" in
+      */git-credential-hostproxy)
+        ;;
+      *)
+        printf '%s\n' "$existing_helper" >> "$new_helpers_tmp"
+        ;;
+    esac
+  fi
+done < "$tmp_helpers"
+
+git_config --unset-all credential.helper 2>/dev/null || true
+
+while IFS= read -r helper; do
+  git_config --add credential.helper "$helper"
+done < "$new_helpers_tmp"
+
+git_config credential.useHttpPath true
+
+rm -f "$tmp_helpers" "$new_helpers_tmp"
+
+if [ "$scope" = 'global' ]; then
+  printf 'Configured global Git credential helper chain:\n'
+else
+  printf 'Configured local Git credential helper chain for %s:\n' "$target_repo"
+fi
+git_config --get-all credential.helper
+
+printf '\nProxy URL default: %s\n' "${GIT_CRED_PROXY_URL:-http://host.docker.internal:18765}"
 printf 'Protocol filter is configured on the host side\n'
+
