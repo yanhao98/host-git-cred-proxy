@@ -37,3 +37,9 @@
 - Token lifecycle should match legacy shell behavior exactly: 32-byte random value encoded as 64 hex chars, persisted in `token`, and rotated atomically via `token.tmp` + `rename` in the same state directory.
 - Audit events should be runtime-sanitized to an allowlist schema before writing NDJSON so even incorrectly-cast inputs cannot persist credential fields (`username`, `password`, `authorization`, `oauth_token`, raw body).
 - Bounded log retention is easiest to reason about as tail-preservation: if `server.log` exceeds 5 MiB, rewrite with only the last `maxBytes` bytes, preserving latest diagnostics while controlling growth.
+
+## Task 6 Git Credential Service Layer
+- Porting proxy core into a typed service works cleanly when `handleCredentialRequest` returns audit-ready metadata (`protocol`, `host`, `path`) alongside `status/body/outcome`.
+- `ACTION_MAP` alias behavior (`get/store/erase`) is now unit-testable without HTTP by exercising the service directly and asserting stubbed git actions.
+- Missing credential compatibility must stay signature-based (`terminal prompts disabled`, `could not read username`, `could not read password`) and still resolve to `200` with an empty body.
+- Reusing the PATH-shim git stub harness from characterization tests keeps subprocess behavior deterministic and verifies `GIT_TERMINAL_PROMPT=0` on every invocation.

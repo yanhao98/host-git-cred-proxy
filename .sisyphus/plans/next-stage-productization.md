@@ -332,7 +332,7 @@ Wave 4: container onboarding, packaging, release automation, Homebrew automation
 
   **Commit**: YES | Message: `feat(security): add token and audit log services` | Files: `host/src/services/`, `tests/host/`
 
-- [ ] 6. Port the git credential core into typed host services without changing semantics
+- [x] 6. Port the git credential core into typed host services without changing semantics
 
   **What to do**: Implement `host/src/services/git-credential.ts` by porting `parseCredentialBody`, the `git credential <action>` subprocess wrapper, missing-credential detection, and outcome/status mapping from `host/server.mjs`. Keep the request body format as raw `key=value` text, enforce the same 64 KiB request cap, preserve `GIT_TERMINAL_PROMPT=0`, and map outcomes exactly: `ok`, `empty`, `denied`, `bad_request`, `error`.
   **Must NOT do**: Do not return raw git stderr directly to container clients in missing-credential cases; do not parse into JSON on the wire; do not change `approve/reject` semantics.
