@@ -93,3 +93,9 @@
 - Installer behavior is now explicit for permission failures: default `/usr/local/bin` writes must succeed, otherwise the error message names `INSTALL_DIR` as the supported fix.
 - Updated onboarding examples remove `host-git-cred-proxy` source-tree mounts and instead use install-from-host plus token-directory mounts (`/run/host-git-cred-proxy/token`).
 - Added `smoke:container-install` coverage that fetches installer over HTTP and verifies executable installs into a temp `INSTALL_DIR`.
+
+## Task 11 UI Host Integration Fix
+- Root-mounting `@elysiajs/static` at `/` can interfere with non-UI traffic under Bun/Elysia and surface proxy POST regressions as `500 Body already used`.
+- The resilient pattern is explicit GET-only UI routing: `GET /` serves `index.html`, `GET /assets/*` serves dist assets, and the final SPA fallback is GET-only and reserved-prefix-aware.
+- Loopback enforcement for panel pages should be route-scoped to UI GET handlers, not plugin-wide, so proxy/container/admin behavior stays untouched.
+- `host/ui/src/App.test.tsx` can remain the canonical plan file while avoiding broad `bun test` failures by skipping the suite when `document` is unavailable.

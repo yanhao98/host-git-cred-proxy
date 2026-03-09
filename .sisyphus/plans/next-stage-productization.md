@@ -550,7 +550,7 @@ Wave 4: container onboarding, packaging, release automation, Homebrew automation
 
   **Commit**: YES | Message: `feat(admin): add bootstrap config restart and log apis` | Files: `host/src/routes/`, `host/src/services/`, `tests/host/`
 
-- [ ] 11. Create the React/Vite panel shell, admin API client, and stable test selectors
+- [x] 11. Create the React/Vite panel shell, admin API client, and stable test selectors
 
   **What to do**: Build the UI shell under `host/ui/` as a single-page local panel that polls admin APIs and exposes stable `data-testid` hooks for all interactive and asserted elements. The minimum selector set is fixed and must exist: `app-shell`, `nav-overview`, `nav-setup`, `nav-requests`, `nav-logs`, `nav-settings`, `overview-status`, `overview-listen-url`, `overview-public-url`, `overview-state-dir`, `setup-install-command`, `setup-configure-command`, `setup-compose-snippet`, `setup-devcontainer-snippet`, `requests-table`, `logs-view`, `settings-host`, `settings-port`, `settings-public-url`, `settings-protocols`, `settings-allowed-hosts`, `settings-save`, `settings-restart`, `restart-banner`, `token-rotate`, `token-file-path`. Centralize all API calls in `api.ts` with automatic bootstrap fetch and nonce attachment for non-GET admin requests.
   **Must NOT do**: Do not expose token plaintext in UI state; do not use server-side rendering; do not make the UI depend on a separate dev server in product mode.

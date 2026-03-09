@@ -17,3 +17,8 @@
 - All existing non-duplicate helpers must be re-added in their original relative order.
 - Old path-based entries for `git-credential-hostproxy` must be purged during the transition to command-based mode.
 - `credential.useHttpPath` must be set to `true` in the same scope as the helper configuration.
+
+## Task 11 UI Route Wiring
+- Do not mount `@elysiajs/static` at `/`; UI shell and assets are served via explicit host GET routes rooted at `resolveUiDistDir()`.
+- SPA fallback stays GET-only and excludes reserved prefixes (`/api`, `/container`, `/healthz`, `/fill`, `/approve`, `/reject`, `/get`, `/store`, `/erase`).
+- Loopback checks for panel access are attached only to UI GET routes, never as a plugin-wide hook that can touch proxy POST handling.
