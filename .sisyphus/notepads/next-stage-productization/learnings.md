@@ -43,3 +43,18 @@
 - `ACTION_MAP` alias behavior (`get/store/erase`) is now unit-testable without HTTP by exercising the service directly and asserting stubbed git actions.
 - Missing credential compatibility must stay signature-based (`terminal prompts disabled`, `could not read username`, `could not read password`) and still resolve to `200` with an empty body.
 - Reusing the PATH-shim git stub harness from characterization tests keeps subprocess behavior deterministic and verifies `GIT_TERMINAL_PROMPT=0` on every invocation.
+
+## Task 7 Proxy + Container Route Tree
+- Elysia route plugins are easier to keep type-safe with explicit chained route declarations than dynamic loop registration; this avoids generic inference conflicts when returning plugin instances.
+- Preserving legacy alias routes (`/get`, `/store`, `/erase`) in the HTTP layer while delegating action mapping to `handleCredentialRequest` keeps behavior frozen and minimizes duplicate logic.
+- Serving `/container/configure-git.sh` and `/container/git-credential-hostproxy` through `resolveShareDir()` with repo fallback keeps download routes install-layout-safe and still reliable in dev/test.
+- A dedicated `/api/admin/*` guarded 404 catch-all preserves reserved-prefix precedence before SPA/static fallback is introduced in later tasks.
+
+## Task 8 CLI + Process Manager
+- Detached lifecycle is reliable when `start` preflights stale PID cleanup, probes port availability, then `Bun.spawn(["bun", "run", <entrypoint>, "serve"], { detached: true })` with `unref()` and append-mode `server.log` fds.
+- PID trust needs two checks together: `process.kill(pid, 0)` for liveness plus `ps -p <pid> -o command=` marker matching for host-git-cred-proxy ownership before stop/status can act.
+- `runtime.json` is the stable runtime contract surface for CLI/status/open; writing `{ pid, startedAt, listenUrl, panelUrl, version, stateDir }` at serve boot keeps start/status/open output deterministic across cwd changes.
+- Rewrite container/git-credential-hostproxy as pure POSIX sh + curl to remove Node/Bun dependency in containers.
+- POSIX sh compatibility: avoid bashisms like [[ ]], local, and arrays.
+- Used mktemp for response body to handle large outputs and separate http_code from body.
+- Testing: spawnSync blocks Bun event loop, preventing Bun.serve from responding. Use asynchronous spawn (Bun.spawn or child_process.spawn) in tests.

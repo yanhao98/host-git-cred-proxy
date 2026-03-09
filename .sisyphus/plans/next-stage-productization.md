@@ -374,7 +374,7 @@ Wave 4: container onboarding, packaging, release automation, Homebrew automation
 
   **Commit**: YES | Message: `feat(proxy): port git credential core service` | Files: `host/src/services/`, `tests/host/`
 
-- [ ] 7. Implement Elysia proxy routes and container-download routes with fixed precedence
+- [x] 7. Implement Elysia proxy routes and container-download routes with fixed precedence
 
   **What to do**: Build the single-port Elysia route tree using explicit route groups and handler ordering. Implement exact proxy routes: `GET /healthz`, `POST /fill`, `POST /approve`, `POST /reject`; support legacy action aliases `/get`, `/store`, `/erase` only if they do not conflict with the fixed contract. Implement container download routes: `GET /container/install.sh`, `GET /container/configure-git.sh`, `GET /container/git-credential-hostproxy`. Template `install.sh` and the helper/configure downloads only with current `publicUrl` and token-file path guidance; do not inject the token value.
   **Must NOT do**: Do not let a static plugin auto-register these paths; do not require admin auth or proxy token for `/container/*`; do not make container download behavior depend on repo mounts.
@@ -416,7 +416,7 @@ Wave 4: container onboarding, packaging, release automation, Homebrew automation
 
   **Commit**: YES | Message: `feat(routes): add proxy and container download routes` | Files: `host/src/routes/`, `tests/host/`
 
-- [ ] 8. Implement process manager and CLI commands with explicit exit-code and restart semantics
+- [x] 8. Implement process manager and CLI commands with explicit exit-code and restart semantics
 
   **What to do**: Implement `host-git-cred-proxy serve`, `start`, `stop`, `status`, `open`, and `rotate-token`. `start` must spawn a detached `serve`, log to `server.log`, wait for `/healthz`, and exit `0` on success or if the matching service is already running. `stop` must exit `0` when the service is stopped or already absent. `status` must exit `0` only when the matching process is running and healthy; use `1` for stopped/stale/unhealthy. `open` must open the current panel URL from `runtime.json` or derived config. `rotate-token` must call the same token service used by the admin API so it becomes effective immediately without restart. Use `server.pid` as numeric pid only; use `runtime.json` plus macOS `ps -p <pid> -o command=` verification to avoid killing unrelated reused PIDs.
   **Must NOT do**: Do not use `nohup` shell wrappers in product mode; do not treat any pid as trusted without command verification; do not require the caller to be in the repo root.
@@ -712,7 +712,7 @@ Wave 4: container onboarding, packaging, release automation, Homebrew automation
 
   **Commit**: YES | Message: `feat(ui): add settings restart and token rotation flow` | Files: `host/ui/src/pages/`, `tests/ui/`, `playwright/`
 
-- [ ] 15. Rewrite `git-credential-hostproxy` as a pure POSIX shell helper
+- [x] 15. Rewrite `git-credential-hostproxy` as a pure POSIX shell helper
 
   **What to do**: Replace the current runtime-dispatch wrapper with a pure `sh` helper that reads stdin, validates `get|store|erase`, maps them to `/fill|/approve|/reject`, resolves the token via `GIT_CRED_PROXY_TOKEN` first and `GIT_CRED_PROXY_TOKEN_FILE` second, defaults `GIT_CRED_PROXY_URL` to `http://host.docker.internal:18765`, and performs the request with `curl`. Read the token file on every invocation so rotated tokens take effect without reinstall. Preserve stdout passthrough on `200`, and stderr + exit `1` on non-200 responses.
   **Must NOT do**: Do not require `node` or `bun`; do not cache token values across invocations; do not change the environment-variable precedence.
