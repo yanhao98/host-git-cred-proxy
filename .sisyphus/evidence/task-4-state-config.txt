@@ -1,0 +1,26 @@
+Task 4 Evidence — state-dir, config, ui-assets services
+
+Implemented files:
+- host/src/services/state-dir.ts
+- host/src/services/config.ts
+- host/src/services/ui-assets.ts
+- tests/host/state-config.test.ts
+
+Behavior covered:
+- State dir resolution with env override + platform defaults and 0700 directory permissions.
+- State file touch helper with 0600 file permissions.
+- Config default schema + load/save + normalization + env override precedence.
+- UI/share asset resolution across env override, installed bin/share layout, and repo-dev fallback.
+
+Verification:
+1) bun test tests/host/state-config.test.ts
+   - Result: 8 passed, 0 failed
+
+2) LSP diagnostics on changed files
+   - host/src/services/state-dir.ts: clean
+   - host/src/services/config.ts: clean
+   - host/src/services/ui-assets.ts: clean
+   - tests/host/state-config.test.ts: clean
+
+3) bun run build:host
+   - Result: success (bundled host/src/index.ts)

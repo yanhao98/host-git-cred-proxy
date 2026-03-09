@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "lib": ["ESNext"],
+    "outDir": "dist/types/host"
+  },
+  "include": ["host/src/**/*.ts"],
+  "exclude": ["host/ui/**/*"]
+}

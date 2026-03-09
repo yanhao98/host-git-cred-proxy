@@ -1,0 +1,18 @@
+network-contract-smoke 2026-03-09T12:39:57Z
+RUN_BUN_TEST tests/host/network-contract.test.ts
+[90m╭──────────────────────────────────────────────────────────╮[0m
+[90m← MainThread(2970) → .opencode(3022) → bun(418573) → bash(pid=418596)
+[90m  args: bash ./scripts/smoke-network-contract.sh[0m[0m
+[90m🔍 找到真实二进制文件: /home/usr_vscode/.bun/bin/bun[0m
+[90m╰──────────────────────────────────────────────────────────╯[0m
+bun test v1.3.10 (30e609e0)
+
+ 4 pass
+ 10 skip
+ 0 fail
+ 5 expect() calls
+Ran 14 tests across 1 file. [48.00ms]
+BUN_TEST_OK
+SKIPPED_DOCKER_DESKTOP_DAEMON_UNAVAILABLE
+SKIPPED_ORBSTACK_NOT_INSTALLED
+SMOKE_NETWORK_CONTRACT_DONE

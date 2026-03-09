@@ -1,0 +1,33 @@
+Task 2 — Bun + TypeScript + Vite workspace scaffold evidence
+Date: 2026-03-09
+
+Command: bun install
+Result: exit 0
+Key output:
+- bun install v1.3.10
+- 292 packages installed
+- Saved lockfile
+
+Command: bun run check
+Result: exit 0
+Key output:
+- tsc --project tsconfig.host.json --noEmit
+- tsc --project host/ui/tsconfig.json --noEmit
+- bash -n host/start.sh host/stop.sh host/status.sh container/configure-git.sh container/git-credential-hostproxy
+
+Command: bun run build:ui
+Result: exit 0
+Key output:
+- vite v5.4.21 building for production...
+- dist/index.html generated
+
+Command: bun run build:host
+Result: exit 0
+Key output:
+- bun build host/src/index.ts --target=bun --outdir=dist/host
+- Bundled 1 module
+- dist/host/index.js generated
+
+Artifact checks:
+- host/ui/dist/index.html exists
+- dist/host/index.js exists
