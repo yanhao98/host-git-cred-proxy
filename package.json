@@ -7,7 +7,7 @@
   "scripts": {
     "check": "bun run check:types && bun run check:shell",
     "check:types": "tsc --project tsconfig.host.json --noEmit && tsc --project host/ui/tsconfig.json --noEmit",
-    "check:shell": "bash -n host/start.sh host/stop.sh host/status.sh container/configure-git.sh container/git-credential-hostproxy",
+    "check:shell": "bash -n host/start.sh host/stop.sh host/status.sh container/configure-git.sh container/git-credential-hostproxy container/install.sh",
     "test": "bun test host/src",
     "test:ui": "vitest run --config host/ui/vite.config.ts --passWithNoTests",
     "test:e2e": "bunx playwright test",
@@ -17,7 +17,8 @@
     "package:release": "echo 'not yet implemented'",
     "smoke:tarball": "echo 'not yet implemented'",
     "smoke:brew": "echo 'not yet implemented'",
-    "smoke:network-contract": "bash ./scripts/smoke-network-contract.sh"
+    "smoke:network-contract": "bash ./scripts/smoke-network-contract.sh",
+    "smoke:container-install": "bun test tests/container/install-smoke.test.ts"
   },
   "dependencies": {
     "@elysiajs/static": "^1.3.0",
@@ -32,6 +33,7 @@
     "@types/react": "^18.3.20",
     "@types/react-dom": "^18.3.6",
     "@vitejs/plugin-react": "^4.4.1",
+    "jsdom": "28.1.0",
     "typescript": "^5.7.3",
     "vite": "^5.4.14",
     "vitest": "^3.0.7"
