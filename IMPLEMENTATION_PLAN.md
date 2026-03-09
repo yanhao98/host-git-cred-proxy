@@ -20,7 +20,7 @@
 - 进程形态：一个宿主机服务，同时提供 UI、管理 API、代理 API、容器 helper 下载入口
 - 发布形态：`Bun 编译的 macOS 二进制 + GitHub Releases + Homebrew tap`
 - 容器 helper：`POSIX sh + curl`，不依赖 `node` / `bun`
-- 当前脚本保留一段过渡期，作为兼容入口；长期目标是以二进制 CLI 为主
+- 开发方式：按全新产品开发，不保留旧脚本兼容层；现有实现仅作为行为参考
 
 ## 3. 当前实现的主要问题
 
@@ -70,7 +70,7 @@ git clone https://...
 
 - 可启动、可停止、可查看状态的宿主机二进制 CLI
 - 基于同一端口的 Web 面板
-- 与当前行为兼容的 Git credential 代理能力
+- 完整的 Git credential 代理能力
 - 容器侧 shell helper 与安装脚本
 - 从源码仓库状态目录迁移到稳定的用户态目录
 - GitHub Releases 二进制产物
@@ -184,14 +184,6 @@ host-git-cred-proxy
 - 需要基础健康检查，避免启动假成功
 - 保留当前 `start/stop/status` 的使用心智
 
-过渡期兼容策略：
-
-- `host/start.sh` 调用新 CLI 的 `start`
-- `host/stop.sh` 调用新 CLI 的 `stop`
-- `host/status.sh` 调用新 CLI 的 `status`
-
-这样可以降低文档迁移和现有用户切换成本。
-
 ## 8. 状态目录设计
 
 必须把状态目录从仓库移走。
@@ -247,7 +239,7 @@ host-git-cred-proxy
 - `allowedHosts` 为空表示不限制 host
 - `requestHistoryLimit` 控制 UI 展示和清理上限，不要求无限累积
 
-对外仍保留兼容环境变量：
+如需支持环境变量覆盖，建议使用以下命名：
 
 - `GIT_CRED_PROXY_HOST`
 - `GIT_CRED_PROXY_PORT`
@@ -562,9 +554,6 @@ host-git-cred-proxy/
 │   │       ├── api.ts
 │   │       ├── pages/
 │   │       └── components/
-│   ├── start.sh
-│   ├── stop.sh
-│   └── status.sh
 ├── container/
 │   ├── install.sh
 │   ├── configure-git.sh
@@ -576,8 +565,8 @@ host-git-cred-proxy/
 
 说明：
 
-- `host/server.mjs` 和 `container/helper.mjs` 的职责会被新的 TypeScript 实现取代
-- 老脚本先留作兼容入口，避免一次性删除造成迁移风险
+- 现有 `host/*.sh`、`host/server.mjs`、`container/helper.mjs` 仅作行为参考，不作为新产品结构约束
+- 新实现可以直接删除旧脚本链路，不需要包袱式迁移
 
 ## 16. 实施阶段
 
@@ -592,12 +581,11 @@ host-git-cred-proxy/
 - 实现状态目录解析与 `config.json` 读写
 - 把当前代理逻辑迁到新的 `/fill`、`/approve`、`/reject`
 - 增加请求脱敏日志
-- 让旧 `host/start.sh` / `stop.sh` / `status.sh` 代理到新 CLI
 
 完成标准：
 
 - 不启动 UI 也能通过 CLI 运行代理
-- 容器仍可按旧协议访问 `/fill` 等接口
+- 容器可按规定协议访问 `/fill`、`/approve`、`/reject`
 - 状态不再写入仓库目录
 
 ### 阶段 2：Web 面板
