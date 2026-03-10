@@ -4,12 +4,10 @@ class HostGitCredProxy < Formula
   version "{{VERSION}}"
   license "MIT"
 
-  on_arm do
+  if Hardware::CPU.arm?
     url "{{URL_ARM64}}"
     sha256 "{{SHA256_ARM64}}"
-  end
-
-  on_intel do
+  else
     url "{{URL_X64}}"
     sha256 "{{SHA256_X64}}"
   end
@@ -36,16 +34,16 @@ class HostGitCredProxy < Formula
       }
     JSON
 
-    env = {
-      "GIT_CRED_PROXY_STATE_DIR" => state_dir.to_s,
-    }
-
     begin
-      system env, bin/"host-git-cred-proxy", "start"
+      with_env("GIT_CRED_PROXY_STATE_DIR" => state_dir.to_s) do
+        system bin/"host-git-cred-proxy", "start"
+      end
       sleep 2
       assert_equal "ok", shell_output("curl -fsS http://127.0.0.1:#{port}/healthz").strip
     ensure
-      system env, bin/"host-git-cred-proxy", "stop"
+      with_env("GIT_CRED_PROXY_STATE_DIR" => state_dir.to_s) do
+        system bin/"host-git-cred-proxy", "stop"
+      end
     end
   end
 end

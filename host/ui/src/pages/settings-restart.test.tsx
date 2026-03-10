@@ -7,15 +7,6 @@ import { adminClient, type BootstrapResponse, type Config } from '../api';
 const IN_DOM = typeof document !== 'undefined';
 const describeWithDom = IN_DOM ? describe : describe.skip;
 
-vi.mock('../api', () => ({
-  adminClient: {
-    getConfig: vi.fn(),
-    saveConfig: vi.fn(),
-    restart: vi.fn(),
-    rotateToken: vi.fn(),
-  },
-}));
-
 const bootstrapData: BootstrapResponse = {
   adminNonce: 'nonce',
   version: '0.1.0',
@@ -57,10 +48,10 @@ const configResponse: Config = {
 };
 
 describeWithDom('Settings restart and token rotation UX', () => {
-  const getConfigMock = vi.mocked(adminClient.getConfig);
-  const saveConfigMock = vi.mocked(adminClient.saveConfig);
-  const restartMock = vi.mocked(adminClient.restart);
-  const rotateTokenMock = vi.mocked(adminClient.rotateToken);
+  const getConfigMock = vi.spyOn(adminClient, 'getConfig');
+  const saveConfigMock = vi.spyOn(adminClient, 'saveConfig');
+  const restartMock = vi.spyOn(adminClient, 'restart');
+  const rotateTokenMock = vi.spyOn(adminClient, 'rotateToken');
   const onRefresh = vi.fn();
   const assignMock = vi.fn();
 

@@ -1,2 +1,1 @@
-task-20-homebrew-error 2026-03-10T07:45:56.481Z
-Homebrew is not installed in this workspace. Local smoke test is blocked.
+task-20-homebrew-error 2026-03-10T10:08:25.623Z

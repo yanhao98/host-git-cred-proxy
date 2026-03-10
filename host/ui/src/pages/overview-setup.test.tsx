@@ -8,12 +8,6 @@ import { adminClient, type BootstrapResponse } from '../api';
 const IN_DOM = typeof document !== 'undefined';
 const describeWithDom = IN_DOM ? describe : describe.skip;
 
-vi.mock('../api', () => ({
-  adminClient: {
-    getStatus: vi.fn(),
-  },
-}));
-
 describeWithDom('Overview & Setup UI', () => {
 
   const mockBootstrapData: BootstrapResponse = {
@@ -58,7 +52,7 @@ describeWithDom('Overview & Setup UI', () => {
   };
 
   beforeEach(() => {
-    (adminClient.getStatus as any).mockResolvedValue(mockStatus);
+    vi.spyOn(adminClient, 'getStatus').mockResolvedValue(mockStatus as any);
   });
 
   afterEach(() => {

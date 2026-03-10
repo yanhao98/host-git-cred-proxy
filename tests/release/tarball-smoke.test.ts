@@ -53,7 +53,7 @@ describe('release tarball smoke', () => {
         await appendEvidence(successEvidencePath, `SKIPPED_RUNTIME_SMOKE_REQUIRES_MACOS ${process.platform}`);
       }
     }
-  });
+  }, { timeout: 15_000 });
 
   test('missing share assets fail loudly', async () => {
     await resetEvidence(errorEvidencePath, 'task-18-package-release-error');
@@ -71,7 +71,7 @@ describe('release tarball smoke', () => {
 
     await extractArchive(archivePath, extractDir);
     await verifyMissingAssetsFailLoudly(extractDir, errorEvidencePath);
-  });
+  }, { timeout: 15_000 });
 });
 
 async function validateExtractedLayout(

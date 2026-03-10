@@ -5,7 +5,7 @@ const PROCESS_COMMANDS = new Set(['serve', 'start', 'stop', 'status', 'open', 'r
 export function resolveCliEntrypoint(entrypoint?: string): string {
   const candidate = entrypoint?.trim() || process.argv[1]?.trim();
 
-  if (candidate && !PROCESS_COMMANDS.has(candidate)) {
+  if (candidate && !PROCESS_COMMANDS.has(candidate) && !candidate.includes('$bunfs')) {
     return path.resolve(candidate);
   }
 

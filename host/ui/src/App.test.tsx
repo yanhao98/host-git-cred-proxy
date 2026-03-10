@@ -6,16 +6,6 @@ import { adminClient } from './api';
 
 const describeWithDom = typeof document === 'undefined' ? describe.skip : describe;
 
-vi.mock('./api', () => ({
-  adminClient: {
-    bootstrap: vi.fn(),
-    getStatus: vi.fn(),
-    getConfig: vi.fn(),
-    getRequests: vi.fn(),
-    getLogs: vi.fn(),
-  }
-}));
-
 const mockBootstrapData = {
   adminNonce: '123',
   version: '1.0.0',
@@ -42,11 +32,11 @@ const mockBootstrapData = {
 describeWithDom('App Shell', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    (adminClient.bootstrap as any).mockResolvedValue(mockBootstrapData);
-    (adminClient.getStatus as any).mockResolvedValue({ running: true });
-    (adminClient.getConfig as any).mockResolvedValue(mockBootstrapData.config);
-    (adminClient.getRequests as any).mockResolvedValue([]);
-    (adminClient.getLogs as any).mockResolvedValue({ lines: [], truncated: false });
+    vi.spyOn(adminClient, 'bootstrap').mockResolvedValue(mockBootstrapData as any);
+    vi.spyOn(adminClient, 'getStatus').mockResolvedValue({ running: true } as any);
+    vi.spyOn(adminClient, 'getConfig').mockResolvedValue(mockBootstrapData.config as any);
+    vi.spyOn(adminClient, 'getRequests').mockResolvedValue([]);
+    vi.spyOn(adminClient, 'getLogs').mockResolvedValue({ lines: [], truncated: false });
   });
 
   it('renders all required data-testid elements', async () => {
@@ -75,13 +65,13 @@ describeWithDom('App Shell', () => {
     expect(screen.getByTestId('setup-compose-snippet')).toBeInTheDocument();
     expect(screen.getByTestId('setup-devcontainer-snippet')).toBeInTheDocument();
 
-    // Requests page
+    // Requests page (empty data returns the empty state element)
     fireEvent.click(screen.getByTestId('nav-requests'));
-    await screen.findByTestId('requests-table');
+    await screen.findByTestId('requests-empty');
 
-    // Logs page
+    // Logs page (empty data returns the empty state element)
     fireEvent.click(screen.getByTestId('nav-logs'));
-    await screen.findByTestId('logs-view');
+    await screen.findByTestId('logs-empty');
 
     // Settings page
     fireEvent.click(screen.getByTestId('nav-settings'));
@@ -96,7 +86,7 @@ describeWithDom('App Shell', () => {
     expect(screen.getByTestId('token-file-path')).toBeInTheDocument();
     
     // Check restart-banner (trigger it manually)
-    (adminClient as any).restart = vi.fn().mockResolvedValue({ restarting: true, nextPanelUrl: 'http://localhost' });
+    vi.spyOn(adminClient, 'restart').mockResolvedValue({ ok: true, restarting: true, nextPanelUrl: 'http://localhost' });
     fireEvent.click(screen.getByTestId('settings-restart'));
     await screen.findByTestId('restart-banner');
   });

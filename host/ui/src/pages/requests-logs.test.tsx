@@ -8,16 +8,9 @@ import { adminClient } from '../api';
 const IN_DOM = typeof document !== 'undefined';
 const describeWithDom = IN_DOM ? describe : describe.skip;
 
-vi.mock('../api', () => ({
-  adminClient: {
-    getRequests: vi.fn(),
-    getLogs: vi.fn(),
-  },
-}));
-
 describeWithDom('Requests & Logs UI', () => {
-  const getRequestsMock = vi.mocked(adminClient.getRequests);
-  const getLogsMock = vi.mocked(adminClient.getLogs);
+  const getRequestsMock = vi.spyOn(adminClient, 'getRequests');
+  const getLogsMock = vi.spyOn(adminClient, 'getLogs');
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -71,7 +64,7 @@ describeWithDom('Requests & Logs UI', () => {
       render(<Requests />);
 
       await waitFor(() => {
-        expect(adminClient.getRequests).toHaveBeenCalledTimes(1);
+        expect(getRequestsMock).toHaveBeenCalledTimes(1);
       });
 
       getRequestsMock.mockResolvedValue([
@@ -90,7 +83,7 @@ describeWithDom('Requests & Logs UI', () => {
         vi.advanceTimersByTime(5000);
       });
 
-      expect(adminClient.getRequests).toHaveBeenCalledTimes(2);
+      expect(getRequestsMock).toHaveBeenCalledTimes(2);
 
       await waitFor(() => {
         expect(screen.getByTestId('requests-table')).toBeInTheDocument();
@@ -139,7 +132,7 @@ describeWithDom('Requests & Logs UI', () => {
       render(<Logs />);
 
       await waitFor(() => {
-        expect(adminClient.getLogs).toHaveBeenCalledTimes(1);
+        expect(getLogsMock).toHaveBeenCalledTimes(1);
       });
 
       getLogsMock.mockResolvedValue({ lines: ['Log line 1', 'Log line 2'], truncated: false });
@@ -148,7 +141,7 @@ describeWithDom('Requests & Logs UI', () => {
         vi.advanceTimersByTime(5000);
       });
 
-      expect(adminClient.getLogs).toHaveBeenCalledTimes(2);
+      expect(getLogsMock).toHaveBeenCalledTimes(2);
 
       await waitFor(() => {
         const view = screen.getByTestId('logs-view');

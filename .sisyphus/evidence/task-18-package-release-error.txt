@@ -1,2 +1,2 @@
-task-18-package-release-error 2026-03-10T06:52:48.895Z
-SKIPPED_MISSING_ASSET_RUNTIME_CHECK_REQUIRES_MACOS linux
+task-18-package-release-error 2026-03-10T10:08:55.368Z
+MISSING_ASSET_FAILURE_OK /var/folders/67/n9b4t0qx6q91sm46rk993djm0000gn/T/host-git-cred-proxy-broken-tree-0x869O/bin/host-git-cred-proxy

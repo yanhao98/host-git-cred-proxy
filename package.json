@@ -8,7 +8,7 @@
     "check": "bun run check:types && bun run check:shell",
     "check:types": "tsc --project tsconfig.host.json --noEmit && tsc --project host/ui/tsconfig.json --noEmit",
     "check:shell": "bash -n host/start.sh host/stop.sh host/status.sh container/configure-git.sh container/git-credential-hostproxy container/install.sh",
-    "test": "bun test host/src",
+    "test": "bun test tests/host tests/container",
     "test:ui": "vitest run --config host/ui/vite.config.ts --passWithNoTests",
     "test:e2e": "bunx playwright test",
     "build:host": "bun build host/src/index.ts --target=bun --outdir=dist/host",
