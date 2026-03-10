@@ -1,0 +1,27 @@
+task-19-release-workflow 2026-03-10T06:53:11.175Z
+TAG_TRIGGER_OK v*
+PACKAGE_JOB_OK package-macos
+RELEASE_JOB_OK draft-release
+RELEASE_GATE_OK needs-package-macos
+RUNNER_OK darwin-x64 macos-14-large
+RUNNER_OK darwin-arm64 macos-14
+ARCHIVE_OK darwin-x64
+ARCHIVE_OK darwin-arm64
+ARTIFACT_NAME_OK matrix-target-artifact
+ARTIFACT_PATH_OK runner-specific-tarball-only
+TARGET_FILTER_ENV_OK workflow-uses-release-target-filter
+PACKAGE_STEP_OK bun-run-package-release
+SMOKE_STEP_OK bun-run-smoke-tarball
+DOWNLOAD_OK release-job-downloads-artifacts
+DOWNLOAD_OK merge-multiple
+CHECKSUM_STEP_OK sha256sum
+DRAFT_RELEASE_OK true
+RELEASE_FILES_STRICT_OK
+RELEASE_ASSET_OK darwin-arm64
+RELEASE_ASSET_OK darwin-x64
+RELEASE_ASSET_OK checksums
+ASSET_SET_GUARD_OK exact-count
+PACKAGE_SCRIPT_FILTER_OK release-target-filter-supported
+SMOKE_TEST_FILTER_OK release-target-filter-supported
+PACKAGE_FLOW_ORDER_OK install-package-smoke-upload
+RELEASE_FLOW_ORDER_OK download-checksum-validate-publish

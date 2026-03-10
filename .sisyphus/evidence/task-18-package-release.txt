@@ -1,0 +1,4 @@
+task-18-package-release 2026-03-10T06:52:48.276Z
+CHECK_ARCHIVE /workspaces/host-git-cred-proxy/dist/releases/host-git-cred-proxy-darwin-x64.tar.gz
+LAYOUT_OK x64
+SKIPPED_RUNTIME_SMOKE_REQUIRES_MACOS linux

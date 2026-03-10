@@ -1,0 +1,2 @@
+- Homebrew smoke testing requires explicit missing-binary fallbacks in Linux workspaces.
+- Emitting explicit blocker evidence rather than silently failing prevents false positives in CI verification.

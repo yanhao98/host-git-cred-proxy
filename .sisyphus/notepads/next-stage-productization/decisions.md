@@ -22,3 +22,7 @@
 - Do not mount `@elysiajs/static` at `/`; UI shell and assets are served via explicit host GET routes rooted at `resolveUiDistDir()`.
 - SPA fallback stays GET-only and excludes reserved prefixes (`/api`, `/container`, `/healthz`, `/fill`, `/approve`, `/reject`, `/get`, `/store`, `/erase`).
 - Loopback checks for panel access are attached only to UI GET routes, never as a plugin-wide hook that can touch proxy POST handling.
+
+## Task 19 Release Workflow
+- Release publication is tag-driven (`push` on `v*`) and stays in the main repository as a draft GitHub Release.
+- Native packaging/smoke runs on a macOS matrix (`macos-13` for `darwin-x64`, `macos-14` for `darwin-arm64`), uploads only runner-specific tarball artifacts, and the release job merges those artifacts to generate the final `checksums.txt` without rebuilding binaries.

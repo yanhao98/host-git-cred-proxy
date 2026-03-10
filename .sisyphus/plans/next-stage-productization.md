@@ -590,7 +590,7 @@ Wave 4: container onboarding, packaging, release automation, Homebrew automation
 
   **Commit**: YES | Message: `feat(ui): add panel shell and admin client` | Files: `host/ui/`, `tests/ui/`, `playwright/`
 
-- [ ] 12. Implement Overview and Setup sections with dynamic local-install instructions
+- [x] 12. Implement Overview and Setup sections with dynamic local-install instructions
 
   **What to do**: Render the Overview and Setup sections from live bootstrap/status/config data. Overview must show current service status, listen URL, container URL, protocol whitelist, host whitelist, token file path, state dir path, and latest start time. Setup must render dynamic copyable snippets for: `curl .../container/install.sh | sh`, `git-credential-hostproxy` configuration command, `docker-compose` snippet, `devcontainer` snippet, and token-directory mount guidance. All generated content must derive from current `publicUrl` and state dir, and must recommend mounting the containing token directory (not a single file) so rotation works.
   **Must NOT do**: Do not display the token value; do not hardcode `/workspaces/host-git-cred-proxy`; do not require repo mounts in the generated examples.
@@ -632,7 +632,7 @@ Wave 4: container onboarding, packaging, release automation, Homebrew automation
 
   **Commit**: YES | Message: `feat(ui): add overview and setup sections` | Files: `host/ui/src/pages/`, `tests/ui/`, `playwright/`
 
-- [ ] 13. Implement Requests and Logs sections backed by redacted polling APIs
+- [x] 13. Implement Requests and Logs sections backed by redacted polling APIs
 
   **What to do**: Build the Requests and Logs views using polling only. Requests must render a table with columns `time`, `action`, `protocol`, `host`, `path`, `outcome`, and `duration`. Logs must render the newest lines returned by `GET /api/admin/logs` with clear empty-state and truncation indicators. Poll intervals are fixed for MVP: 5 seconds for Requests and 5 seconds for Logs, pausing when the tab is hidden if the client utility already supports it; otherwise keep the simple interval.
   **Must NOT do**: Do not add SSE/WebSocket; do not render any secret-bearing fields; do not fetch unbounded log/request histories.
@@ -672,7 +672,7 @@ Wave 4: container onboarding, packaging, release automation, Homebrew automation
 
   **Commit**: YES | Message: `feat(ui): add requests and logs sections` | Files: `host/ui/src/pages/`, `tests/ui/`, `playwright/`
 
-- [ ] 14. Implement Settings save/restart/reconnect UX and token-rotate controls
+- [x] 14. Implement Settings save/restart/reconnect UX and token-rotate controls
 
   **What to do**: Build the Settings section for editing `host`, `port`, `publicUrl`, protocol whitelist, and host whitelist. The flow is fixed: `Save` calls `POST /api/admin/config`, shows `restartRequired`, and exposes the returned `nextPanelUrl`; `Restart` calls `POST /api/admin/restart`, displays `[data-testid="restart-banner"]`, waits 1500 ms, then navigates with `window.location.assign(nextPanelUrl)`; on the new origin the app re-runs bootstrap to fetch the new nonce. Add a token-rotate action that calls `POST /api/admin/token/rotate`, updates any displayed token-path metadata, and shows a non-secret success message. Keep `credential.useHttpPath` configuration messaging as informational only; it belongs to container onboarding, not panel settings.
   **Must NOT do**: Do not keep polling the old origin after restart; do not attempt cross-origin XHR to the new panel URL; do not expose token plaintext in toast/state.
@@ -882,7 +882,7 @@ Wave 4: container onboarding, packaging, release automation, Homebrew automation
 
   **Commit**: YES | Message: `feat(release): add packaging scripts and tarball layout` | Files: `scripts/`, `package.json`, `host/src/services/`, `tests/release/`
 
-- [ ] 19. Add GitHub Actions release workflow with native macOS smoke tests and GitHub Releases publication
+- [x] 19. Add GitHub Actions release workflow with native macOS smoke tests and GitHub Releases publication
 
   **What to do**: Implement a tag-driven GitHub Actions workflow that builds native release artifacts on both `macos-13` (Intel) and `macos-14` (Apple Silicon), runs the packaging smoke suite on each runner, uploads artifacts to a merge/release job, generates checksums, and publishes a draft GitHub Release containing the two tarballs plus `checksums.txt`. Keep release publication in the main repo; do not require a second repo for this task.
   **Must NOT do**: Do not rely solely on cross-compilation from a non-macOS runner; do not publish assets without smoke evidence; do not push the Homebrew tap from this task.

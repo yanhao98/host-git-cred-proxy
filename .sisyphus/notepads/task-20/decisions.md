@@ -1,0 +1,2 @@
+- Tap identifier intentionally left as [DECISION NEEDED] rather than hardcoding a guessed repository.
+- Formula logic depends deterministically on tarball architecture (on_arm/on_intel) and pre-calculated checksums, separating packaging from release distribution.

@@ -2,8 +2,12 @@
   "active_plan": "/workspaces/host-git-cred-proxy/.sisyphus/plans/next-stage-productization.md",
   "started_at": "2026-03-09T12:22:48.571Z",
   "session_ids": [
-    "ses_32e121d25ffeQUr1iq0cs2noRP"
+    "ses_32e121d25ffeQUr1iq0cs2noRP",
+    "ses_32b2dfddeffeIsbBlN0V7DKK2A",
+    "ses_32ab27526ffeXGsym6ONoHVBvI",
+    "ses_32a998b25ffeu0fwRZez45SUoc"
   ],
   "plan_name": "next-stage-productization",
-  "agent": "atlas"
+  "agent": "atlas",
+  "worktree_path": "/workspaces/host-git-cred-proxy"
 }
