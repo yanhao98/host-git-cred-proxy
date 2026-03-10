@@ -16,6 +16,12 @@
 
 这意味着它代理的是“宿主机 Git 当前能取到的 HTTPS 凭证”，不是 macOS 全部系统密码。
 
+推荐的分发/运行方式是：
+
+- 通过 GitHub Release tarball 或 Homebrew 安装
+- 直接执行 `host-git-cred-proxy` 二进制命令
+- 仅在开发/调试源码仓库时，才使用 `./host/start.sh` 这类辅助脚本
+
 ## 项目结构
 
 - `host/src/`：宿主机服务本体、CLI、管理 API、状态管理与发布时运行逻辑
@@ -64,7 +70,8 @@ host-git-cred-proxy/
 - 默认代理所有 `https` Git 凭证
 - 默认监听 `127.0.0.1:18765`
 - 容器默认通过 `http://host.docker.internal:18765` 访问宿主机
-- token 生成到 `./host/state/token`
+- 二进制运行时，默认 state 目录在 macOS 上是 `~/Library/Application Support/host-git-cred-proxy`
+- token 默认生成到 `<stateDir>/token`
 
 如果你还要代理 `http` 仓库：
 
@@ -74,7 +81,44 @@ GIT_CRED_PROXY_PROTOCOLS=https,http ./host/start.sh
 
 ## 使用
 
-### 1. 宿主机启动代理
+### 1. 推荐：直接执行发布二进制
+
+Release tarball 解压后，请保留 `bin/` 和 `share/host-git-cred-proxy/` 的相对目录结构。
+
+例如：
+
+```bash
+tar -xzf host-git-cred-proxy-darwin-arm64.tar.gz
+export PATH="$PWD/bin:$PATH"
+host-git-cred-proxy start
+```
+
+查看状态：
+
+```bash
+host-git-cred-proxy status
+```
+
+打开本地面板：
+
+```bash
+host-git-cred-proxy open
+```
+
+停止服务：
+
+```bash
+host-git-cred-proxy stop
+```
+
+如果你想把状态目录放到其他位置：
+
+```bash
+export GIT_CRED_PROXY_STATE_DIR=/absolute/path/to/state-dir
+host-git-cred-proxy start
+```
+
+### 2. 开发态：从源码仓库启动代理
 
 在宿主机进入这个项目目录：
 
@@ -88,7 +132,9 @@ GIT_CRED_PROXY_PROTOCOLS=https,http ./host/start.sh
 ./host/status.sh
 ```
 
-### 2. 把宿主机 token 目录挂载到容器
+`./host/start.sh` 仍然可用，但它主要是源码仓库里的开发便利入口，不是推荐的最终分发方式。
+
+### 3. 把宿主机 token 目录挂载到容器
 
 容器只需要读取 token 目录，不需要挂载 `host-git-cred-proxy` 源码仓库。
 
@@ -97,7 +143,12 @@ GIT_CRED_PROXY_PROTOCOLS=https,http ./host/start.sh
 
 请挂载目录（而不是单个 token 文件），这样 token 轮换后容器里仍能读到新文件。
 
-### 3. 容器里安装并配置 Git helper
+常见情况：
+
+- 如果你是通过源码仓库里的 `./host/start.sh` 运行，state 目录通常是 `<repo>/host/state`
+- 如果你是通过已安装二进制运行，state 目录通常是 `~/Library/Application Support/host-git-cred-proxy`
+
+### 4. 容器里安装并配置 Git helper
 
 ```bash
 curl -fsSL http://host.docker.internal:18765/container/install.sh | sh
@@ -132,7 +183,7 @@ export GIT_CRED_PROXY_URL=http://localhost:18765
 curl -fsSL "$GIT_CRED_PROXY_INSTALL_URL/container/install.sh" | sh
 ```
 
-### 4. 验证
+### 5. 验证
 
 ```bash
 git ls-remote origin
@@ -159,10 +210,13 @@ printf 'protocol=https\nhost=example.com\npath=owner/repo.git\n\n' | git credent
 使用前先设置 token 目录和容器访问地址：
 
 ```bash
-export HOST_GIT_CRED_PROXY_TOKEN_DIR=/absolute/path/to/host-git-cred-proxy/host/state
+export HOST_GIT_CRED_PROXY_TOKEN_DIR=/absolute/path/to/state-dir
 export GIT_CRED_PROXY_INSTALL_URL=http://host.docker.internal:18765
 export GIT_CRED_PROXY_URL=http://host.docker.internal:18765
 ```
+
+如果你是源码仓库启动，`HOST_GIT_CRED_PROXY_TOKEN_DIR` 往往类似 `<repo>/host/state`；
+如果你是安装后的二进制运行，通常类似 `~/Library/Application Support/host-git-cred-proxy`。
 
 然后把示例复制到你的项目里：
 
@@ -190,7 +244,7 @@ http://localhost:18765
 先在宿主机设置：
 
 ```bash
-export HOST_GIT_CRED_PROXY_TOKEN_DIR=/absolute/path/to/host-git-cred-proxy/host/state
+export HOST_GIT_CRED_PROXY_TOKEN_DIR=/absolute/path/to/state-dir
 ```
 
 然后复制到你的项目：
@@ -220,7 +274,7 @@ cp examples/devcontainer.json .devcontainer/devcontainer.json
 - `GIT_CRED_PROXY_TOKEN`：可选，直接传 token，优先于 token 文件
 - `GIT_CRED_PROXY_TOKEN_FILE`：可选，自定义 token 文件路径
 - `GIT_CRED_PROXY_RUNTIME`：可选，显式指定 `bun` 或 `node`
-- `HOST_GIT_CRED_PROXY_TOKEN_DIR`：示例编排文件使用的宿主机 token 目录（挂载到 `/run/host-git-cred-proxy`）
+- `HOST_GIT_CRED_PROXY_TOKEN_DIR`：示例编排文件使用的宿主机 state 目录（挂载到 `/run/host-git-cred-proxy`）
 
 ## 构建与分发
 
@@ -240,7 +294,7 @@ cp examples/devcontainer.json .devcontainer/devcontainer.json
 ## 安全说明
 
 - 服务端默认只监听 `127.0.0.1`
-- token 存在 `host/state/` 下，并通过 `.gitignore` 忽略
+- token 存在当前 state 目录下；源码仓库启动时通常是 `host/state/`，二进制运行时通常是系统默认 state 目录
 - 只要容器能读取这个目录，也就能读取 token
 - 这适合你信任当前容器的开发场景，不适合不可信容器或多租户环境
 
