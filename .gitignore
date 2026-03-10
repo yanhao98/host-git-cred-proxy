@@ -2,3 +2,8 @@ host/state/
 state/
 .DS_Store
 node_modules/
+
+# Build artifacts
+dist/releases/
+dist/homebrew/
+host/ui/dist/
