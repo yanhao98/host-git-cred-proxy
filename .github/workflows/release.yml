@@ -1,0 +1,105 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  package-macos:
+    name: Package and smoke ${{ matrix.target.id }}
+    runs-on: ${{ matrix.target.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - id: darwin-x64
+            runner: macos-14-large
+            archive: host-git-cred-proxy-darwin-x64.tar.gz
+            artifact: release-darwin-x64
+          - id: darwin-arm64
+            runner: macos-14
+            archive: host-git-cred-proxy-darwin-arm64.tar.gz
+            artifact: release-darwin-arm64
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.3.10'
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Package release tarball
+        env:
+          HOST_GIT_CRED_PROXY_RELEASE_TARGETS: ${{ matrix.target.id }}
+        run: bun run package:release
+
+      - name: Smoke release tarball
+        env:
+          HOST_GIT_CRED_PROXY_RELEASE_TARGETS: ${{ matrix.target.id }}
+        run: bun run smoke:tarball
+
+      - name: Upload release tarball artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.target.artifact }}
+          if-no-files-found: error
+          path: dist/releases/${{ matrix.target.archive }}
+
+  draft-release:
+    name: Publish draft GitHub Release
+    runs-on: ubuntu-latest
+    needs: package-macos
+
+    steps:
+      - name: Download packaged tarballs
+        uses: actions/download-artifact@v4
+        with:
+          pattern: release-darwin-*
+          path: dist/releases
+          merge-multiple: true
+
+      - name: Generate combined checksums
+        shell: bash
+        run: |
+          mkdir -p dist/releases
+          sha256sum \
+            dist/releases/host-git-cred-proxy-darwin-arm64.tar.gz \
+            dist/releases/host-git-cred-proxy-darwin-x64.tar.gz \
+            > dist/releases/checksums.txt
+
+      - name: Validate release asset set
+        shell: bash
+        run: |
+          shopt -s nullglob
+          expected=(
+            dist/releases/host-git-cred-proxy-darwin-arm64.tar.gz
+            dist/releases/host-git-cred-proxy-darwin-x64.tar.gz
+            dist/releases/checksums.txt
+          )
+          for file in "${expected[@]}"; do
+            test -f "$file"
+          done
+          actual=(dist/releases/*)
+          if [ "${#actual[@]}" -ne "${#expected[@]}" ]; then
+            printf 'Unexpected release asset set:\n%s\n' "${actual[@]}"
+            exit 1
+          fi
+
+      - name: Publish draft GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          fail_on_unmatched_files: true
+          files: |
+            dist/releases/host-git-cred-proxy-darwin-arm64.tar.gz
+            dist/releases/host-git-cred-proxy-darwin-x64.tar.gz
+            dist/releases/checksums.txt
