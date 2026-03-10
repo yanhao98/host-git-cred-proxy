@@ -1,7 +1,10 @@
 import { statSync } from 'node:fs';
 import path from 'node:path';
 
+declare const __HOST_GIT_CRED_PROXY_PACKAGED__: boolean | undefined;
+
 const SHARE_DIR_ENV = 'GIT_CRED_PROXY_SHARE_DIR';
+const IS_PACKAGED_BUILD = typeof __HOST_GIT_CRED_PROXY_PACKAGED__ !== 'undefined' && __HOST_GIT_CRED_PROXY_PACKAGED__;
 
 export function resolveShareDir(): string {
   const envShareDir = process.env[SHARE_DIR_ENV]?.trim();
@@ -20,6 +23,16 @@ export function resolveShareDir(): string {
   const installedShareDir = path.resolve(path.dirname(process.execPath), '..', 'share', 'host-git-cred-proxy');
   if (isPackagedLayout(installedShareDir)) {
     return installedShareDir;
+  }
+
+  if (IS_PACKAGED_BUILD) {
+    throw new Error(
+      [
+        'Unable to resolve host-git-cred-proxy assets for packaged runtime.',
+        `Checked installed share dir: ${installedShareDir}`,
+        `Set ${SHARE_DIR_ENV} to override.`,
+      ].join(' '),
+    );
   }
 
   const repoRoot = path.resolve(import.meta.dir, '..', '..', '..');

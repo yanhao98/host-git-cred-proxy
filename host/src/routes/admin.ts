@@ -6,6 +6,7 @@ import { Elysia } from 'elysia';
 
 import type { AdminNonceService } from '../services/admin-nonce';
 import type { Config } from '../services/config';
+import { resolveCliEntrypoint, resolveServeSpawnArgs } from '../services/self-exec';
 import { loadConfig, saveConfig } from '../services/config';
 import { readAuditEvents } from '../services/request-log';
 import type { TokenService } from '../services/token';
@@ -139,17 +140,16 @@ export function createAdminRoutes(dependencies: AdminRoutesDependencies, options
 }
 
 async function restartCurrentProcess(dependencies: AdminRoutesDependencies): Promise<void> {
-  const entrypoint = process.argv[1]?.trim();
+  const entrypoint = resolveCliEntrypoint();
   if (!entrypoint) {
     process.exit(1);
   }
 
-  const resolvedEntrypoint = path.resolve(entrypoint);
   const logFilePath = path.resolve(dependencies.stateDir, SERVER_LOG_FILE_NAME);
   const logFd = openSync(logFilePath, 'a');
 
   try {
-    const subprocess = Bun.spawn(['bun', 'run', resolvedEntrypoint, 'serve'], {
+    const subprocess = Bun.spawn(resolveServeSpawnArgs(entrypoint), {
       detached: true,
       stdin: 'ignore',
       stdout: logFd,

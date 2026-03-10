@@ -7,6 +7,7 @@ import path from 'node:path';
 
 import type { Config } from './config';
 import { loadConfig } from './config';
+import { resolveCliEntrypoint, resolveServeSpawnArgs } from './self-exec';
 import { resolveStateDir, ensureStateFile } from './state-dir';
 import { TokenService } from './token';
 import { startServer } from '../server';
@@ -204,7 +205,7 @@ async function runStartCommand(context: ProcessCommandContext): Promise<number> 
 
   const logFd = openSync(paths.logFilePath, 'a');
   try {
-    const subprocess = Bun.spawn(['bun', 'run', entrypoint, 'serve'], {
+    const subprocess = Bun.spawn(resolveServeSpawnArgs(entrypoint), {
       detached: true,
       stdin: 'ignore',
       stdout: logFd,
@@ -385,13 +386,7 @@ function resolveRuntimePaths(stateDir: string): RuntimePaths {
 }
 
 function resolveEntrypoint(entrypoint?: string): string {
-  const candidate = entrypoint?.trim() || process.argv[1]?.trim();
-
-  if (!candidate) {
-    throw new Error('Unable to resolve host CLI entrypoint for detached start command');
-  }
-
-  return path.resolve(candidate);
+  return resolveCliEntrypoint(entrypoint);
 }
 
 function toListenUrl(config: Config): string {
