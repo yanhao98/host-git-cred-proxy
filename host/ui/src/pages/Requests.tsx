@@ -1,44 +1,67 @@
 import React, { useState, useEffect } from 'react';
-import { adminClient } from '../api';
+import { adminClient, type RequestRecord } from '../api';
 
 export function Requests() {
-  const [requests, setRequests] = useState<any[]>([]);
+  const [requests, setRequests] = useState<RequestRecord[]>([]);
 
   useEffect(() => {
-    adminClient.getRequests().then(setRequests).catch(console.error);
+    let mounted = true;
+    const fetchRequests = () => {
+      adminClient.getRequests()
+        .then(data => {
+          if (mounted) setRequests(data);
+        })
+        .catch(console.error);
+    };
+    
+    fetchRequests();
+    const interval = setInterval(fetchRequests, 5000);
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+    };
   }, []);
 
   return (
     <div>
       <h1 className="page-title">Requests</h1>
-      <div className="card">
-        <table data-testid="requests-table" style={{ width: '100%', textAlign: 'left' }}>
-          <thead>
-            <tr>
-              <th>Time</th>
-              <th>Action</th>
-              <th>Protocol</th>
-              <th>Host</th>
-              <th>Path</th>
-              <th>Outcome</th>
-              <th>Duration</th>
-            </tr>
-          </thead>
-          <tbody>
-            {requests.map((r, i) => (
-              <tr key={i}>
-                <td>{new Date(r.timestamp).toISOString()}</td>
-                <td>{r.action}</td>
-                <td>{r.protocol}</td>
-                <td>{r.host}</td>
-                <td>{r.path}</td>
-                <td>{r.outcome}</td>
-                <td>{r.durationMs}ms</td>
+      
+      {requests.length === 0 ? (
+        <div className="card">
+          <p data-testid="requests-empty" style={{ color: 'var(--color-text-muted)' }}>
+            No requests logged yet.
+          </p>
+        </div>
+      ) : (
+        <div className="card" style={{ overflowX: 'auto' }}>
+          <table data-testid="requests-table" style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid var(--color-border)', color: 'var(--color-text-muted)' }}>
+                <th style={{ padding: '8px' }}>Time</th>
+                <th style={{ padding: '8px' }}>Action</th>
+                <th style={{ padding: '8px' }}>Protocol</th>
+                <th style={{ padding: '8px' }}>Host</th>
+                <th style={{ padding: '8px' }}>Path</th>
+                <th style={{ padding: '8px' }}>Outcome</th>
+                <th style={{ padding: '8px' }}>Duration</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {requests.map((r) => (
+                <tr key={`${r.time}-${r.action}-${r.path}`} style={{ borderBottom: '1px solid var(--color-border-light)' }}>
+                  <td style={{ padding: '8px', whiteSpace: 'nowrap' }}>{new Date(r.time).toISOString()}</td>
+                  <td style={{ padding: '8px' }}>{r.action}</td>
+                  <td style={{ padding: '8px' }}>{r.protocol}</td>
+                  <td style={{ padding: '8px' }}>{r.host}</td>
+                  <td style={{ padding: '8px', wordBreak: 'break-all', fontFamily: 'monospace' }}>{r.path}</td>
+                  <td style={{ padding: '8px' }}>{r.outcome}</td>
+                  <td style={{ padding: '8px', whiteSpace: 'nowrap' }}>{r.durationMs}ms</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

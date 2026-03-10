@@ -54,6 +54,21 @@ export interface RotateResponse {
   tokenFilePath: string;
 }
 
+export interface RequestRecord {
+  time: string;
+  action: string;
+  protocol: string;
+  host: string;
+  path: string;
+  outcome: string;
+  durationMs: number;
+}
+
+export interface LogsResponse {
+  lines: string[];
+  truncated: boolean;
+}
+
 class AdminClient {
   private nonce: string | null = null;
   private bootstrapPromise: Promise<BootstrapResponse> | null = null;
@@ -130,13 +145,13 @@ class AdminClient {
     return res.json();
   }
 
-  async getRequests(): Promise<any[]> {
+  async getRequests(): Promise<RequestRecord[]> {
     const res = await fetch('/api/admin/requests');
     if (!res.ok) throw new Error('Failed to get requests');
     return res.json();
   }
 
-  async getLogs(): Promise<{ lines: string[], truncated: boolean }> {
+  async getLogs(): Promise<LogsResponse> {
     const res = await fetch('/api/admin/logs');
     if (!res.ok) throw new Error('Failed to get logs');
     return res.json();
