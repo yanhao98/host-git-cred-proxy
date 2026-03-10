@@ -18,8 +18,9 @@
 
 推荐的分发/运行方式是：
 
-- 通过 GitHub Release tarball 或 Homebrew 安装
-- 直接执行 `host-git-cred-proxy` 二进制命令
+- 优先直接执行 `host-git-cred-proxy` 二进制命令
+- 如果仓库已经发布 release tarball，可以直接解压后运行
+- Homebrew 相关公式与自动化已在仓库中，但是否可直接 `brew install` 取决于 tap / release 是否已经发布
 - 仅在开发/调试源码仓库时，才使用 `./host/start.sh` 这类辅助脚本
 
 ## 项目结构
@@ -76,14 +77,14 @@ host-git-cred-proxy/
 如果你还要代理 `http` 仓库：
 
 ```bash
-GIT_CRED_PROXY_PROTOCOLS=https,http ./host/start.sh
+GIT_CRED_PROXY_PROTOCOLS=https,http host-git-cred-proxy start
 ```
 
 ## 使用
 
-### 1. 推荐：直接执行发布二进制
+### 1. 推荐：直接执行二进制
 
-Release tarball 解压后，请保留 `bin/` 和 `share/host-git-cred-proxy/` 的相对目录结构。
+如果你拿到的是 release tarball，请解压后保留 `bin/` 和 `share/host-git-cred-proxy/` 的相对目录结构。
 
 例如：
 
@@ -200,6 +201,12 @@ printf 'protocol=https\nhost=example.com\npath=owner/repo.git\n\n' | git credent
 这两个示例都假设你已经在宿主机启动了代理：
 
 ```bash
+host-git-cred-proxy start
+```
+
+如果你是在源码仓库里开发调试，也可以继续使用：
+
+```bash
 ./host/start.sh
 ```
 
@@ -289,7 +296,7 @@ cp examples/devcontainer.json .devcontainer/devcontainer.json
 - `.github/workflows/release.yml`：tag 驱动的 GitHub Release workflow
 - `packaging/homebrew/formula.rb.template`：Homebrew formula 模板
 
-注意：在当前 Linux/容器环境里，README 只描述这些能力和脚本，不声称已经完成了原生 macOS / Homebrew 的最终宿主机验收。
+注意：仓库中已经有 release / Homebrew 相关脚本与自动化配置，但这并不等于任意时刻都已经存在可直接下载的 release 资产或可直接安装的 tap。请以当前仓库的 Releases / tap 发布状态为准。
 
 ## 安全说明
 
