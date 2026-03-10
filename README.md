@@ -16,34 +16,48 @@
 
 这意味着它代理的是“宿主机 Git 当前能取到的 HTTPS 凭证”，不是 macOS 全部系统密码。
 
-## 目录结构
+## 项目结构
 
-- `host/`：只在宿主机运行
-- `container/`：只在容器里运行
-- `examples/`：接入示例
-- `host/state/`：运行时状态目录，存 token、pid、日志
+- `host/src/`：宿主机服务本体、CLI、管理 API、状态管理与发布时运行逻辑
+- `host/ui/`：本地管理面板前端（React + Vite）
+- `host/`：宿主机启动/停止/状态 shell 包装脚本与运行时状态目录
+- `container/`：容器内安装脚本、Git helper、配置脚本
+- `examples/`：`docker-compose` / `devcontainer` 接入示例
+- `scripts/`：发布、公式生成、workflow 验证等自动化脚本
+- `tests/`：host、container、release、UI 相关自动化测试
+- `packaging/`：分发相关模板（例如 Homebrew formula 模板）
 
-当前结构：
+当前仓库的大致结构：
 
 ```text
 host-git-cred-proxy/
 ├── host/
-│   ├── server.mjs
+│   ├── src/
+│   ├── ui/
 │   ├── start.sh
 │   ├── status.sh
 │   ├── stop.sh
 │   └── state/
 ├── container/
-│   ├── configure-git.sh
-│   ├── git-credential-hostproxy
-│   ├── helper.mjs
-│   └── install.sh
 ├── examples/
-│   ├── devcontainer.json
-│   └── docker-compose.yml
+├── packaging/
+├── scripts/
+├── tests/
 ├── package.json
 └── README.md
 ```
+
+## 本地管理面板
+
+项目现在包含一个本地 Web 管理面板，用来查看服务状态和辅助配置。当前主要页面包括：
+
+- `Overview`：运行状态、监听地址、公开地址、token 路径等概览信息
+- `Setup`：本地安装、容器接入、compose / devcontainer 片段
+- `Requests`：脱敏请求记录轮询视图
+- `Logs`：日志轮询视图与截断提示
+- `Settings`：配置保存、重启跳转、token rotate
+
+这个面板是本地开发/运维辅助工具，不是远程管理入口。
 
 ## 默认行为
 
@@ -207,6 +221,21 @@ cp examples/devcontainer.json .devcontainer/devcontainer.json
 - `GIT_CRED_PROXY_TOKEN_FILE`：可选，自定义 token 文件路径
 - `GIT_CRED_PROXY_RUNTIME`：可选，显式指定 `bun` 或 `node`
 - `HOST_GIT_CRED_PROXY_TOKEN_DIR`：示例编排文件使用的宿主机 token 目录（挂载到 `/run/host-git-cred-proxy`）
+
+## 构建与分发
+
+项目当前已经包含面向发布的脚本与 workflow，主要用于生成 macOS 发布产物和后续分发自动化：
+
+- `bun run package:release`：生成 `dist/releases/` 下的 Darwin tarballs 和 `checksums.txt`
+- `bun run smoke:tarball`：验证 tarball 结构；在非 macOS 环境下只做结构校验，不会伪装成原生 Darwin 运行验证
+- `bun run smoke:brew`：生成 Homebrew formula 并尝试本地 smoke；如果当前环境缺少 `brew`，会显式失败并写出阻塞证据
+
+仓库里还包含：
+
+- `.github/workflows/release.yml`：tag 驱动的 GitHub Release workflow
+- `packaging/homebrew/formula.rb.template`：Homebrew formula 模板
+
+注意：在当前 Linux/容器环境里，README 只描述这些能力和脚本，不声称已经完成了原生 macOS / Homebrew 的最终宿主机验收。
 
 ## 安全说明
 
