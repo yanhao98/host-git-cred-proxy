@@ -1,0 +1,51 @@
+class HostGitCredProxy < Formula
+  desc "Let Docker containers reuse host Git HTTPS credentials"
+  homepage "{{HOMEPAGE}}"
+  version "{{VERSION}}"
+  license "MIT"
+
+  on_arm do
+    url "{{URL_ARM64}}"
+    sha256 "{{SHA256_ARM64}}"
+  end
+
+  on_intel do
+    url "{{URL_X64}}"
+    sha256 "{{SHA256_X64}}"
+  end
+
+  def install
+    bin.install "bin/host-git-cred-proxy"
+    (share/"host-git-cred-proxy").install Dir["share/host-git-cred-proxy/*"]
+  end
+
+  test do
+    state_dir = testpath/"state"
+    state_dir.mkpath
+    port = free_port
+
+    (state_dir/"config.json").write <<~JSON
+      {
+        "host": "127.0.0.1",
+        "port": #{port},
+        "publicUrl": "http://127.0.0.1:#{port}",
+        "protocols": ["https"],
+        "allowedHosts": [],
+        "requestHistoryLimit": 5,
+        "openBrowserOnStart": false
+      }
+    JSON
+
+    env = {
+      "GIT_CRED_PROXY_STATE_DIR" => state_dir.to_s,
+    }
+
+    begin
+      system env, bin/"host-git-cred-proxy", "start"
+      sleep 2
+      assert_equal "ok", shell_output("curl -fsS http://127.0.0.1:#{port}/healthz").strip
+    ensure
+      system env, bin/"host-git-cred-proxy", "stop"
+    end
+  end
+end

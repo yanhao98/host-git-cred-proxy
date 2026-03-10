@@ -14,9 +14,9 @@
     "build:host": "bun build host/src/index.ts --target=bun --outdir=dist/host",
     "build:ui": "vite build --config host/ui/vite.config.ts",
     "build": "bun run build:host && bun run build:ui",
-    "package:release": "echo 'not yet implemented'",
-    "smoke:tarball": "echo 'not yet implemented'",
-    "smoke:brew": "echo 'not yet implemented'",
+    "package:release": "bun run scripts/package-release.ts",
+    "smoke:tarball": "bun test tests/release/tarball-smoke.test.ts",
+    "smoke:brew": "bun run scripts/generate-formula.ts && bun test tests/release/smoke-brew.test.ts",
     "smoke:network-contract": "bash ./scripts/smoke-network-contract.sh",
     "smoke:container-install": "bun test tests/container/install-smoke.test.ts"
   },
