@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { adminClient, type BootstrapResponse, type Config } from '../api';
 
 export function Settings({ bootstrapData, onRefresh }: { bootstrapData: BootstrapResponse, onRefresh: () => void }) {

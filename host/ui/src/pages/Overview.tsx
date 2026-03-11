@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { adminClient, type BootstrapResponse, type StatusResponse } from '../api';
 
 export function Overview({ bootstrapData }: { bootstrapData: BootstrapResponse }) {

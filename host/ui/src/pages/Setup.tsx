@@ -1,4 +1,3 @@
-import React from 'react';
 import { type BootstrapResponse } from '../api';
 
 const DEFAULT_PUBLIC_URL = 'http://host.docker.internal:18765';

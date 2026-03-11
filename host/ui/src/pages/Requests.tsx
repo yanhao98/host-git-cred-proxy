@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { adminClient, type RequestRecord } from '../api';
 
 export function Requests() {

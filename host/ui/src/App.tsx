@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { adminClient, type BootstrapResponse } from './api';
 
 import { Overview } from './pages/Overview';
