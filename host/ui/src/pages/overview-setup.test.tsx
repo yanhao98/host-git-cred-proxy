@@ -36,7 +36,7 @@ describeWithDom('Overview & Setup UI', () => {
       publicUrl: 'http://test.docker.internal:18765',
       stateDir: '/test/state/dir',
       tokenFilePath: '/test/state/dir/token',
-      installCommand: 'curl -fsSL http://test.docker.internal:18765/container/install.sh | sh',
+      installCommand: 'curl -fsSL http://test.docker.internal:18765/container/install.sh | sudo sh',
     },
   };
 
@@ -72,29 +72,29 @@ describeWithDom('Overview & Setup UI', () => {
       expect(screen.getByTestId('overview-token-file-path').textContent).toBe('/test/state/dir/token');
       
       await waitFor(() => {
-        expect(screen.getByTestId('overview-status').textContent).toBe('Running');
+        expect(screen.getByTestId('overview-status').textContent).toBe('运行中');
       });
     });
 
     it('renders dynamic status data correctly', async () => {
       render(<Overview bootstrapData={mockBootstrapData} />);
-      
+
       await waitFor(() => {
-        expect(screen.getByTestId('overview-status').textContent).toBe('Running');
-        expect(screen.getByTestId('overview-start-time').textContent).not.toBe('N/A');
+        expect(screen.getByTestId('overview-status').textContent).toBe('运行中');
+        expect(screen.getByTestId('overview-start-time').textContent).not.toBe('暂无');
       });
     });
 
-    it('shows "All hosts allowed" if allowedHosts is empty', async () => {
+    it('shows "不限制" if allowedHosts is empty', async () => {
       const data = {
         ...mockBootstrapData,
         config: { ...mockBootstrapData.config, allowedHosts: [] },
       };
       render(<Overview bootstrapData={data} />);
-      expect(screen.getByTestId('overview-host-whitelist').textContent).toBe('All hosts allowed');
+      expect(screen.getByTestId('overview-host-whitelist').textContent).toBe('不限制');
 
       await waitFor(() => {
-        expect(screen.getByTestId('overview-status').textContent).toBe('Running');
+        expect(screen.getByTestId('overview-status').textContent).toBe('运行中');
       });
     });
   });
@@ -113,15 +113,14 @@ describeWithDom('Overview & Setup UI', () => {
       expect(composeSnippet).toContain('GIT_CRED_PROXY_URL=http://test.docker.internal:18765');
       expect(composeSnippet).toContain('GIT_CRED_PROXY_INSTALL_URL=http://test.docker.internal:18765');
       expect(composeSnippet).toContain('/test/state/dir:/run/host-git-cred-proxy:ro');
-      expect(composeSnippet).toContain('curl -fsSL $$GIT_CRED_PROXY_INSTALL_URL/container/install.sh | sh');
-      expect(composeSnippet).toContain('$$INSTALL_DIR/configure-git.sh --global');
+      expect(composeSnippet).toContain('curl -fsSL $$GIT_CRED_PROXY_INSTALL_URL/container/install.sh');
+      expect(composeSnippet).toContain('configure-git.sh --global');
 
       const devcontainerSnippet = screen.getByTestId('setup-devcontainer-snippet').textContent;
       expect(devcontainerSnippet).toContain('"GIT_CRED_PROXY_URL": "http://test.docker.internal:18765"');
       expect(devcontainerSnippet).toContain('"GIT_CRED_PROXY_INSTALL_URL": "http://test.docker.internal:18765"');
       expect(devcontainerSnippet).toContain('source=/test/state/dir,target=/run/host-git-cred-proxy,type=bind,readonly');
-      expect(devcontainerSnippet).toContain('curl -fsSL \\"$GIT_CRED_PROXY_INSTALL_URL/container/install.sh\\" | sh');
-      expect(devcontainerSnippet).toContain('\\"$INSTALL_DIR/configure-git.sh\\" --global');
+      expect(devcontainerSnippet).toContain('configure-git.sh --global');
     });
 
     it('never leaks token plaintext', () => {

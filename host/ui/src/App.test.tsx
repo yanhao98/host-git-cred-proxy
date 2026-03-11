@@ -25,7 +25,7 @@ const mockBootstrapData = {
     publicUrl: 'http://public.url',
     stateDir: '/tmp/state',
     tokenFilePath: '/tmp/token',
-    installCommand: 'curl -fsSL http://public.url/container/install.sh | sh'
+    installCommand: 'curl -fsSL http://public.url/container/install.sh | sudo sh'
   }
 };
 

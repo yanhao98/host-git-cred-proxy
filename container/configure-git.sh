@@ -3,7 +3,7 @@ set -eu
 
 scope='global'
 target_repo=$(pwd)
-helper_cmd='git-credential-hostproxy'
+helper_cmd='hostproxy'
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -31,9 +31,9 @@ done
 
 git_config() {
   if [ "$scope" = 'global' ]; then
-    git config --global "$@"
+    git --no-pager config --global "$@"
   else
-    git -C "$target_repo" config --local "$@"
+    git --no-pager -C "$target_repo" config --local "$@"
   fi
 }
 
@@ -69,9 +69,11 @@ git_config credential.useHttpPath true
 rm -f "$tmp_helpers" "$new_helpers_tmp"
 
 if [ "$scope" = 'global' ]; then
-  printf 'Configured global Git credential helper chain:\n'
+  config_file="${HOME}/.gitconfig"
+  printf 'Configured global Git credential helper chain (%s):\n' "$config_file"
 else
-  printf 'Configured local Git credential helper chain for %s:\n' "$target_repo"
+  config_file="${target_repo}/.git/config"
+  printf 'Configured local Git credential helper chain (%s):\n' "$config_file"
 fi
 git_config --get-all credential.helper
 

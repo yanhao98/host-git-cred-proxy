@@ -69,7 +69,7 @@ export function createAdminRoutes(dependencies: AdminRoutesDependencies, options
           publicUrl: config.publicUrl,
           stateDir: dependencies.stateDir,
           tokenFilePath: resolveTokenFilePath(dependencies.stateDir),
-          installCommand: `curl -fsSL ${normalizeBaseUrl(config.publicUrl)}/container/install.sh | sh`,
+          installCommand: `curl -fsSL ${normalizeBaseUrl(config.publicUrl)}/container/install.sh | sudo sh`,
         },
       };
     }, hooks)

@@ -45,14 +45,14 @@ export function Settings({ bootstrapData, onRefresh }: { bootstrapData: Bootstra
       setSaveStatus({
         tone: res.restartRequired ? 'info' : 'success',
         message: res.restartRequired
-          ? 'Settings saved. Restart required to apply the new network configuration.'
-          : 'Settings saved. No restart is required.',
+          ? '配置已保存。需要重启服务以应用新的网络配置。'
+          : '配置已保存，无需重启。',
         nextPanelUrl: res.nextPanelUrl,
       });
     } catch (err) {
       setSaveStatus({
         tone: 'error',
-        message: `Failed to save settings. ${getErrorMessage(err)} Reload the panel and try again if your session is stale.`,
+        message: `保存失败。${getErrorMessage(err)} 如果会话过期，请刷新面板后重试。`,
       });
     } finally {
       setSaving(false);
@@ -74,7 +74,7 @@ export function Settings({ bootstrapData, onRefresh }: { bootstrapData: Bootstra
       setRestartTargetUrl(null);
       setSaveStatus({
         tone: 'error',
-        message: `Failed to restart the service. ${getErrorMessage(err)} Reload the panel and try again if your session is stale.`,
+        message: `重启失败。${getErrorMessage(err)} 如果会话过期，请刷新面板后重试。`,
       });
       setRestarting(false);
     }
@@ -88,28 +88,27 @@ export function Settings({ bootstrapData, onRefresh }: { bootstrapData: Bootstra
         setTokenFilePath(res.tokenFilePath);
         setRotateStatus({
           tone: 'success',
-          message: 'Token rotated successfully. No restart is required.',
+          message: 'Token 已轮换，无需重启。',
         });
       }
     } catch (err) {
       setRotateStatus({
         tone: 'error',
-        message: `Failed to rotate the token. ${getErrorMessage(err)} Reload the panel and try again if your session is stale.`,
+        message: `Token 轮换失败。${getErrorMessage(err)} 如果会话过期，请刷新面板后重试。`,
       });
     }
   };
 
-  if (!config) return <div>Loading config...</div>;
+  if (!config) return <div>加载配置中...</div>;
 
   return (
     <div>
-      <h1 className="page-title">Settings</h1>
-      
+      <h1 className="page-title">设置</h1>
+
       {restarting && (
         <div data-testid="restart-banner" style={{ background: '#fef08a', color: '#854d0e', padding: '1rem', borderRadius: '4px', marginBottom: '1rem' }}>
-          Restarting service... reconnecting to{' '}
-          <code data-testid="restart-next-panel-url">{restartTargetUrl ?? 'the next panel URL'}</code>
-          .
+          正在重启服务... 即将跳转到{' '}
+          <code data-testid="restart-next-panel-url">{restartTargetUrl ?? '新面板地址'}</code>
         </div>
       )}
 
@@ -127,88 +126,88 @@ export function Settings({ bootstrapData, onRefresh }: { bootstrapData: Bootstra
           <p style={{ margin: 0 }}>{saveStatus.message}</p>
           {saveStatus.nextPanelUrl && (
             <p style={{ margin: '0.5rem 0 0' }}>
-              Next panel URL:{' '}
+              新面板地址：{' '}
               <code data-testid="save-next-panel-url">{saveStatus.nextPanelUrl}</code>
             </p>
           )}
           {saveStatus.tone === 'error' && (
             <button type="button" data-testid="settings-reload" onClick={onRefresh} style={{ marginTop: '0.75rem' }}>
-              Reload panel
+              刷新面板
             </button>
           )}
         </div>
       )}
 
       <form onSubmit={handleSave} className="card">
-        <h3>Network</h3>
+        <h3>网络</h3>
         <div className="field">
-          <label htmlFor="settings-host-input">Host</label>
-          <input 
+          <label htmlFor="settings-host-input">监听地址</label>
+          <input
             id="settings-host-input"
-            type="text" 
-            data-testid="settings-host" 
-            value={config.host} 
-            onChange={e => setConfig({ ...config, host: e.target.value })} 
+            type="text"
+            data-testid="settings-host"
+            value={config.host}
+            onChange={e => setConfig({ ...config, host: e.target.value })}
           />
         </div>
         <div className="field">
-          <label htmlFor="settings-port-input">Port</label>
-          <input 
+          <label htmlFor="settings-port-input">端口</label>
+          <input
             id="settings-port-input"
-            type="number" 
-            data-testid="settings-port" 
-            value={config.port} 
-            onChange={e => setConfig({ ...config, port: parseInt(e.target.value, 10) })} 
+            type="number"
+            data-testid="settings-port"
+            value={config.port}
+            onChange={e => setConfig({ ...config, port: parseInt(e.target.value, 10) })}
           />
         </div>
         <div className="field">
-          <label htmlFor="settings-public-url-input">Public URL</label>
-          <input 
+          <label htmlFor="settings-public-url-input">容器访问地址</label>
+          <input
             id="settings-public-url-input"
-            type="text" 
-            data-testid="settings-public-url" 
-            value={config.publicUrl} 
-            onChange={e => setConfig({ ...config, publicUrl: e.target.value })} 
+            type="text"
+            data-testid="settings-public-url"
+            value={config.publicUrl}
+            onChange={e => setConfig({ ...config, publicUrl: e.target.value })}
           />
         </div>
 
-        <h3>Access Control</h3>
+        <h3>访问控制</h3>
         <div className="field">
-          <label htmlFor="settings-protocols-input">Protocols (comma separated)</label>
-          <input 
+          <label htmlFor="settings-protocols-input">允许协议（逗号分隔）</label>
+          <input
             id="settings-protocols-input"
-            type="text" 
-            data-testid="settings-protocols" 
-            value={config.protocols.join(', ')} 
-            onChange={e => setConfig({ ...config, protocols: e.target.value.split(',').map(s => s.trim()) })} 
+            type="text"
+            data-testid="settings-protocols"
+            value={config.protocols.join(', ')}
+            onChange={e => setConfig({ ...config, protocols: e.target.value.split(',').map(s => s.trim()) })}
           />
         </div>
         <div className="field">
-          <label htmlFor="settings-allowed-hosts-input">Allowed Hosts (comma separated)</label>
-          <input 
+          <label htmlFor="settings-allowed-hosts-input">允许 Host（逗号分隔）</label>
+          <input
             id="settings-allowed-hosts-input"
-            type="text" 
-            data-testid="settings-allowed-hosts" 
-            value={config.allowedHosts.join(', ')} 
-            onChange={e => setConfig({ ...config, allowedHosts: e.target.value.split(',').map(s => s.trim()) })} 
+            type="text"
+            data-testid="settings-allowed-hosts"
+            value={config.allowedHosts.join(', ')}
+            onChange={e => setConfig({ ...config, allowedHosts: e.target.value.split(',').map(s => s.trim()) })}
           />
         </div>
 
         <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem' }}>
           <button type="submit" data-testid="settings-save" disabled={saving}>
-            {saving ? 'Saving...' : 'Save Config'}
+            {saving ? '保存中...' : '保存配置'}
           </button>
           <button type="button" onClick={handleRestart} data-testid="settings-restart" disabled={restarting}>
-            Restart Service
+            重启服务
           </button>
         </div>
       </form>
 
       <div className="card">
-        <h3>Token Management</h3>
-        <p>Token Path: <code data-testid="token-file-path">{tokenFilePath}</code></p>
+        <h3>Token 管理</h3>
+        <p>Token 路径：<code data-testid="token-file-path">{tokenFilePath}</code></p>
         <button type="button" onClick={handleRotate} data-testid="token-rotate">
-          Rotate Token
+          轮换 Token
         </button>
         {rotateStatus && (
           <p
@@ -221,9 +220,6 @@ export function Settings({ bootstrapData, onRefresh }: { bootstrapData: Bootstra
             {rotateStatus.message}
           </p>
         )}
-        <p style={{ color: 'var(--color-text-muted)', marginTop: '0.75rem' }}>
-          `credential.useHttpPath` is informational only here. Container helper setup still belongs in onboarding, not in panel settings.
-        </p>
       </div>
     </div>
   );
@@ -231,17 +227,17 @@ export function Settings({ bootstrapData, onRefresh }: { bootstrapData: Bootstra
 
 function validateConfig(config: Config): string | null {
   if (!Number.isInteger(config.port) || config.port < 1 || config.port > 65535) {
-    return 'Port must be an integer between 1 and 65535.';
+    return '端口必须是 1 到 65535 之间的整数。';
   }
 
   const publicUrl = config.publicUrl.trim();
   if (!publicUrl.startsWith('http://') && !publicUrl.startsWith('https://')) {
-    return 'Public URL must start with http:// or https://.';
+    return '容器访问地址必须以 http:// 或 https:// 开头。';
   }
 
   return null;
 }
 
 function getErrorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : 'Unknown error.';
+  return error instanceof Error ? error.message : '未知错误。';
 }

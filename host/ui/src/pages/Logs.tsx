@@ -24,11 +24,11 @@ export function Logs() {
 
   return (
     <div>
-      <h1 className="page-title">Logs</h1>
+      <h1 className="page-title">日志</h1>
       <div className="card">
         {logs.lines.length === 0 ? (
           <p data-testid="logs-empty" style={{ color: 'var(--color-text-muted)' }}>
-            No logs available yet.
+            暂无日志。
           </p>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -39,7 +39,7 @@ export function Logs() {
             </div>
             {logs.truncated && (
               <p data-testid="logs-truncated" style={{ color: '#d97706', fontSize: '13px', margin: 0, marginTop: '8px' }}>
-                ⚠ Logs truncated to the newest lines
+                日志已截断，仅显示最近的记录
               </p>
             )}
           </div>

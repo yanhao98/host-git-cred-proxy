@@ -33,7 +33,7 @@ const bootstrapData: BootstrapResponse = {
     publicUrl: 'http://127.0.0.1:18765',
     stateDir: '/tmp/state',
     tokenFilePath: '/tmp/state/token',
-    installCommand: 'curl -fsSL http://127.0.0.1:18765/container/install.sh | sh',
+    installCommand: 'curl -fsSL http://127.0.0.1:18765/container/install.sh | sudo sh',
   },
 };
 
@@ -78,7 +78,7 @@ describeWithDom('Settings restart and token rotation UX', () => {
     await waitFor(() => expect(screen.getByTestId('settings-save')).toBeInTheDocument());
     fireEvent.click(screen.getByTestId('settings-save'));
 
-    await waitFor(() => expect(screen.getByTestId('save-status')).toHaveTextContent('Restart required'));
+    await waitFor(() => expect(screen.getByTestId('save-status')).toHaveTextContent('需要重启'));
     expect(screen.getByTestId('save-next-panel-url')).toHaveTextContent('http://127.0.0.1:18766');
   });
 
@@ -89,7 +89,7 @@ describeWithDom('Settings restart and token rotation UX', () => {
     fireEvent.change(screen.getByTestId('settings-port'), { target: { value: '70000' } });
     fireEvent.click(screen.getByTestId('settings-save'));
 
-    await waitFor(() => expect(screen.getByTestId('save-status')).toHaveTextContent('Port must be an integer between 1 and 65535.'));
+    await waitFor(() => expect(screen.getByTestId('save-status')).toHaveTextContent('端口必须是 1 到 65535 之间的整数'));
     expect(saveConfigMock).not.toHaveBeenCalled();
   });
 
@@ -123,7 +123,7 @@ describeWithDom('Settings restart and token rotation UX', () => {
     await waitFor(() => expect(screen.getByTestId('token-rotate')).toBeInTheDocument());
     fireEvent.click(screen.getByTestId('token-rotate'));
 
-    await waitFor(() => expect(screen.getByTestId('rotate-status')).toHaveTextContent('Token rotated successfully'));
+    await waitFor(() => expect(screen.getByTestId('rotate-status')).toHaveTextContent('Token 已轮换'));
     expect(screen.getByTestId('token-file-path')).toHaveTextContent('/tmp/state/token.next');
     expect(screen.queryByText(/[a-f0-9]{64}/i)).not.toBeInTheDocument();
   });

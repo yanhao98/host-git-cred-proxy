@@ -123,7 +123,7 @@ describeWithDom('Requests & Logs UI', () => {
         expect(screen.getByTestId('logs-truncated')).toBeInTheDocument();
       });
 
-      expect(screen.getByTestId('logs-truncated').textContent).toContain('⚠ Logs truncated to the newest lines');
+      expect(screen.getByTestId('logs-truncated').textContent).toContain('日志已截断');
     });
 
     it('polls for new logs every 5 seconds', async () => {

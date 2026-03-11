@@ -7,10 +7,28 @@ import { Requests } from './pages/Requests';
 import { Logs } from './pages/Logs';
 import { Settings } from './pages/Settings';
 
+const TABS = ['overview', 'setup', 'requests', 'logs', 'settings'] as const;
+
+function getTabFromHash(): string {
+  const hash = window.location.hash.replace('#', '');
+  return TABS.includes(hash as any) ? hash : 'overview';
+}
+
 export default function App() {
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState(getTabFromHash);
   const [bootstrapData, setBootstrapData] = useState<BootstrapResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const switchTab = (tab: string) => {
+    setActiveTab(tab);
+    window.location.hash = tab;
+  };
+
+  useEffect(() => {
+    const onHashChange = () => setActiveTab(getTabFromHash());
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
 
   useEffect(() => {
     adminClient.bootstrap()
@@ -24,11 +42,11 @@ export default function App() {
   }, []);
 
   if (error) {
-    return <div style={{ padding: '2rem', color: 'red' }}>Error loading panel: {error}</div>;
+    return <div style={{ padding: '2rem', color: 'red' }}>加载面板失败：{error}</div>;
   }
 
   if (!bootstrapData) {
-    return <div style={{ padding: '2rem' }}>Loading...</div>;
+    return <div style={{ padding: '2rem' }}>加载中...</div>;
   }
 
   return (
@@ -37,40 +55,40 @@ export default function App() {
         <div className="sidebar-header">
           host-git-cred-proxy
         </div>
-        <div 
+        <div
           className={`nav-link ${activeTab === 'overview' ? 'active' : ''}`}
-          onClick={() => setActiveTab('overview')}
+          onClick={() => switchTab('overview')}
           data-testid="nav-overview"
         >
-          Overview
+          概览
         </div>
-        <div 
+        <div
           className={`nav-link ${activeTab === 'setup' ? 'active' : ''}`}
-          onClick={() => setActiveTab('setup')}
+          onClick={() => switchTab('setup')}
           data-testid="nav-setup"
         >
-          Setup
+          接入
         </div>
-        <div 
+        <div
           className={`nav-link ${activeTab === 'requests' ? 'active' : ''}`}
-          onClick={() => setActiveTab('requests')}
+          onClick={() => switchTab('requests')}
           data-testid="nav-requests"
         >
-          Requests
+          请求
         </div>
-        <div 
+        <div
           className={`nav-link ${activeTab === 'logs' ? 'active' : ''}`}
-          onClick={() => setActiveTab('logs')}
+          onClick={() => switchTab('logs')}
           data-testid="nav-logs"
         >
-          Logs
+          日志
         </div>
-        <div 
+        <div
           className={`nav-link ${activeTab === 'settings' ? 'active' : ''}`}
-          onClick={() => setActiveTab('settings')}
+          onClick={() => switchTab('settings')}
           data-testid="nav-settings"
         >
-          Settings
+          设置
         </div>
       </div>
       <div className="content">

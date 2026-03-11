@@ -13,7 +13,7 @@ export function Requests() {
         })
         .catch(console.error);
     };
-    
+
     fetchRequests();
     const interval = setInterval(fetchRequests, 5000);
     return () => {
@@ -24,12 +24,12 @@ export function Requests() {
 
   return (
     <div>
-      <h1 className="page-title">Requests</h1>
-      
+      <h1 className="page-title">请求</h1>
+
       {requests.length === 0 ? (
         <div className="card">
           <p data-testid="requests-empty" style={{ color: 'var(--color-text-muted)' }}>
-            No requests logged yet.
+            暂无请求记录。
           </p>
         </div>
       ) : (
@@ -37,13 +37,13 @@ export function Requests() {
           <table data-testid="requests-table" style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--color-border)', color: 'var(--color-text-muted)' }}>
-                <th style={{ padding: '8px' }}>Time</th>
-                <th style={{ padding: '8px' }}>Action</th>
-                <th style={{ padding: '8px' }}>Protocol</th>
+                <th style={{ padding: '8px' }}>时间</th>
+                <th style={{ padding: '8px' }}>操作</th>
+                <th style={{ padding: '8px' }}>协议</th>
                 <th style={{ padding: '8px' }}>Host</th>
-                <th style={{ padding: '8px' }}>Path</th>
-                <th style={{ padding: '8px' }}>Outcome</th>
-                <th style={{ padding: '8px' }}>Duration</th>
+                <th style={{ padding: '8px' }}>路径</th>
+                <th style={{ padding: '8px' }}>结果</th>
+                <th style={{ padding: '8px' }}>耗时</th>
               </tr>
             </thead>
             <tbody>

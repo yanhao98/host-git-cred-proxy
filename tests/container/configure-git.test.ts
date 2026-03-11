@@ -51,7 +51,7 @@ describe("configure-git.sh tests", () => {
     expect(result1.status).toBe(0);
     
     let helpers = git(["config", "--global", "--get-all", "credential.helper"]);
-    expect(helpers[0]).toBe("git-credential-hostproxy");
+    expect(helpers[0]).toBe("hostproxy");
     expect(helpers[1]).toBe("cache");
     expect(helpers.length).toBe(2);
 
@@ -59,7 +59,7 @@ describe("configure-git.sh tests", () => {
     expect(result2.status).toBe(0);
     
     helpers = git(["config", "--global", "--get-all", "credential.helper"]);
-    expect(helpers[0]).toBe("git-credential-hostproxy");
+    expect(helpers[0]).toBe("hostproxy");
     expect(helpers[1]).toBe("cache");
     expect(helpers.length).toBe(2);
   });
@@ -75,7 +75,7 @@ describe("configure-git.sh tests", () => {
     expect(result.status).toBe(0);
 
     const helpers = git(["config", "--local", "--get-all", "credential.helper"], otherRepo);
-    expect(helpers[0]).toBe("git-credential-hostproxy");
+    expect(helpers[0]).toBe("hostproxy");
     expect(helpers[1]).toBe("store");
     expect(helpers.length).toBe(2);
   });
@@ -89,7 +89,7 @@ describe("configure-git.sh tests", () => {
     expect(result.status).toBe(0);
 
     const helpers = git(["config", "--global", "--get-all", "credential.helper"]);
-    expect(helpers[0]).toBe("git-credential-hostproxy");
+    expect(helpers[0]).toBe("hostproxy");
     expect(helpers[1]).toBe("osxkeychain");
     expect(helpers.length).toBe(2);
   });
@@ -109,7 +109,7 @@ describe("configure-git.sh tests", () => {
     expect(result.status).toBe(0);
 
     const helpers = git(["config", "--local", "--get-all", "credential.helper"], spaceRepo);
-    expect(helpers[0]).toBe("git-credential-hostproxy");
+    expect(helpers[0]).toBe("hostproxy");
     expect(helpers.length).toBe(1);
   });
 });

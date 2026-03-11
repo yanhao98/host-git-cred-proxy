@@ -92,6 +92,7 @@ export const startServer = (options: number | StartServerOptions = {}) => {
   }).listen({
     hostname: host,
     port,
+    reusePort: false,
   });
 };
 
