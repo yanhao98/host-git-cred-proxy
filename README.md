@@ -80,6 +80,12 @@ host-git-cred-proxy/
 GIT_CRED_PROXY_PROTOCOLS=https,http host-git-cred-proxy start
 ```
 
+如果你是在源码仓库里开发调试，也可以继续使用：
+
+```bash
+GIT_CRED_PROXY_PROTOCOLS=https,http ./host/start.sh
+```
+
 ## 使用
 
 ### 1. 推荐：直接执行二进制
@@ -306,6 +312,12 @@ cp examples/devcontainer.json .devcontainer/devcontainer.json
 - 这适合你信任当前容器的开发场景，不适合不可信容器或多租户环境
 
 ## 停止代理
+
+```bash
+host-git-cred-proxy stop
+```
+
+如果你是在源码仓库里开发调试，也可以继续使用：
 
 ```bash
 ./host/stop.sh
